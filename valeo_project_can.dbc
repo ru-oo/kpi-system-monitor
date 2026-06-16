@@ -1,0 +1,301 @@
+VERSION ""
+
+
+NS_ :
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_: PC_UI Jeston STM32
+VAL_TABLE_ Pi5_Status 3 "Error" 2 "Timeout" 1 "Online" 0 "No_Data" ;
+VAL_TABLE_ Command_Id 5 "Set_Destination" 4 "Reserved" 3 "AMCL_Init" 2 "Set_Model" 1 "Set_Precision" 0 "No_Command" ;
+VAL_TABLE_ Destination_Select 4 "Garage" 3 "Charge_Station" 2 "Parking" 1 "Start" 0 "None" ;
+VAL_TABLE_ Estop_Command 1 "E_Stop_Request" 0 "Normal" ;
+VAL_TABLE_ Amcl_Command 1 "AMCL_Init_Request" 0 "No_Request" ;
+VAL_TABLE_ Model_Select 2 "YOLO26n" 1 "YOLO26s" 0 "None" ;
+VAL_TABLE_ Precision_Mode 3 "INT8" 2 "FP16" 1 "FP32" 0 "No_Change" ;
+VAL_TABLE_ Jetson_Model 1 "Orin" 0 "Unknown" ;
+VAL_TABLE_ Fail_Safe_Level_Event 4 "Emergency_Stop" 3 "LiDAR_Only" 2 "Light_Overload" 1 "Heavy_Normal" ;
+VAL_TABLE_ Reason_Code_Table 8 "Pi5_Fail" 7 "Path_Fail" 6 "AMCL_Unstable" 5 "UART_Fail" 4 "Camera_Fail" 3 "LiDAR_Fail" 2 "Inference_Delay" 1 "GPU_Overload" 0 "None" ;
+VAL_TABLE_ Event_Code_Table 5 "Communication_Fail" 4 "Path_Fail" 3 "Sensor_Fail" 2 "Emergency_stop" 1 "Fail_Safe_Changed" 0 "No_Event" ;
+VAL_TABLE_ controlEnable_Table 1 "Enable" 0 "Disable" ;
+VAL_TABLE_ YoloMode_Table 5 "LiDAR_Only" 4 "YOLO26n_INT8" 3 "YOLO26s_INT8" 2 "YOLO26s_FP16" 1 "YOLO26s_FP32" 0 "Off" ;
+VAL_TABLE_ Drivingstste_Table 5 "Error" 4 "Stop" 3 "Avoidance" 2 "Autonomous" 1 "Manual" 0 "Idle" ;
+VAL_TABLE_ Planning_State_Table 3 "Fail" 2 "Success" 1 "Planning" 0 "No_Data" ;
+VAL_TABLE_ Network_Status_Table 3 "Error" 2 "Timeout" 1 "Online" 0 "No_Data" ;
+VAL_TABLE_ STM32_Control_Flag_Table 255 "E_Stop" 1 "Encoder_Reset" 0 "Normal" ;
+VAL_TABLE_ Loc_Mode_Table 3 "GPS" 2 "ODOM" 1 "AMCL" 0 "INIT" ;
+VAL_TABLE_ Behavior_Mode_Table 4 "RESUME" 3 "OVERTAKE" 2 "NUDGE" 1 "OBSTACLE_STOP" 0 "LANE_FOLLOW" ;
+
+
+BO_ 16 STM32_Control_Command: 8 Jeston
+ SG_ Target_Speed_mmps : 0|16@1- (1,0) [-32768|32767] "mm/s"  STM32
+ SG_ Target_Steering_deg : 16|16@1- (0.01,0) [-327.68|327.67] "deg"  STM32
+ SG_ Driving_State_Cmd : 32|8@1+ (1,0) [0|255] ""  STM32
+ SG_ Alive_Counter_010 : 40|8@1+ (1,0) [0|255] "count"  STM32
+ SG_ Control_Flag : 48|8@1+ (1,0) [0|255] ""  STM32
+ SG_ Reserved_010_7 : 56|8@1+ (1,0) [0|255] ""  STM32
+
+BO_ 32 STM32_Encoder_Feedback: 8 STM32
+ SG_ Left_Count : 0|32@1- (1,0) [-2147483648|2147483647] "count"  Jeston
+ SG_ Right_Count : 32|32@1- (1,0) [-2147483648|2147483647] "count"  Jeston
+
+BO_ 33 STM32_IMU_Feedback: 8 STM32
+ SG_ IMU_Yaw_deg : 0|16@1- (0.01,0) [-327.68|327.67] "deg"  Jeston
+ SG_ IMU_GyroZ_dps : 16|16@1- (0.01,0) [-327.68|327.67] "deg/s"  Jeston
+ SG_ IMU_Roll_deg : 32|16@1- (0.01,0) [-327.68|327.67] "deg"  Jeston
+ SG_ IMU_Pitch_deg : 48|16@1- (0.01,0) [-327.68|327.67] "deg"  Jeston
+
+
+BO_ 512 UI_Command: 8 PC_UI
+ SG_ Command_Counter : 56|8@1+ (1,0) [0|255] "count"  Jeston
+ SG_ Reserved_200_6 : 48|8@1+ (1,0) [0|255] ""  Jeston
+ SG_ Destination_Select : 40|8@1+ (1,0) [0|255] ""  Jeston
+ SG_ Estop_Command : 32|8@1+ (1,0) [0|255] ""  Jeston
+ SG_ Amcl_Command : 24|8@1+ (1,0) [0|1] ""  Jeston
+ SG_ Model_Select : 16|8@1+ (1,0) [0|2] ""  Jeston
+ SG_ Precision_Mode : 8|8@1+ (1,0) [0|3] ""  Jeston
+ SG_ Command_Id : 0|8@1+ (1,0) [0|255] ""  Jeston
+
+BO_ 513 UI_Goal_Pose: 8 PC_UI
+ SG_ Goal_Counter : 56|8@1+ (1,0) [0|255] "count"  Jeston
+ SG_ Goal_Valid_Flag : 48|8@1+ (1,0) [0|1] ""  Jeston
+ SG_ Goal_Yaw_deg : 32|16@1- (0.1,0) [-3276.8|3276.7] "deg"  Jeston
+ SG_ Goal_Y_m : 16|16@1- (0.01,0) [-327.68|327.67] "m"  Jeston
+ SG_ Goal_X_m : 0|16@1- (0.01,0) [-327.68|327.67] "m"  Jeston
+
+BO_ 261 Hardware_Info: 8 Jeston
+ SG_ Hardware_Info_Counter : 56|8@1+ (1,0) [0|255] "count"  PC_UI
+ SG_ Reserved_105_6 : 48|8@1+ (1,0) [0|255] ""  PC_UI
+ SG_ Reserved_105_5 : 40|8@1+ (1,0) [0|255] ""  PC_UI
+ SG_ Reserved_105_4 : 32|8@1+ (1,0) [0|255] ""  PC_UI
+ SG_ Reserved_105_3 : 24|8@1+ (1,0) [0|255] ""  PC_UI
+ SG_ Reserved_105_2 : 16|8@1+ (1,0) [0|255] ""  PC_UI
+ SG_ Orin_Memory_GB : 8|8@1+ (1,0) [0|255] "GB"  PC_UI
+ SG_ Jetson_Model : 0|8@1+ (1,0) [0|255] ""  PC_UI
+
+BO_ 264 Map_Datum: 8 Jeston
+ SG_ Origin_Latitude_1e7 : 0|32@1- (1,0) [-2147483648|2147483647] "deg_1e-7"  PC_UI
+ SG_ Origin_Longitude_1e7 : 32|32@1- (1,0) [-2147483648|2147483647] "deg_1e-7"  PC_UI
+
+BO_ 265 Network_Status: 8 Jeston
+ SG_ Alive_Counter_109 : 56|8@1+ (1,0) [0|255] "count"  PC_UI
+ SG_ Reserved_109_6 : 48|8@1+ (1,0) [0|255] ""  PC_UI
+ SG_ Reserved_109_5 : 40|8@1+ (1,0) [0|255] ""  PC_UI
+ SG_ Network_Status : 32|8@1+ (1,0) [0|3] ""  PC_UI
+ SG_ Wifi_Rssi_dBm : 24|8@1- (1,0) [-128|127] "dBm"  PC_UI
+ SG_ Network_Loss_Rate : 16|8@1+ (0.1,0) [0|25.5] "%"  PC_UI
+ SG_ Wifi_Ping_ms : 0|16@1+ (1,0) [0|65535] "ms"  PC_UI
+
+BO_ 263 Perception_Validation: 8 Jeston
+ SG_ Alive_Counter_107 : 56|8@1+ (1,0) [0|255] "count"  PC_UI
+ SG_ Reserved_107_6 : 48|8@1+ (1,0) [0|255] ""  PC_UI
+ SG_ Reserved_107_5 : 40|8@1+ (1,0) [0|255] ""  PC_UI
+ SG_ Reserved_107_4 : 32|8@1+ (1,0) [0|255] ""  PC_UI
+ SG_ Trigger_Accuracy : 24|8@1+ (0.5,0) [0|100] "%"  PC_UI
+ SG_ False_Positive_Count : 16|8@1+ (1,0) [0|255] "count"  PC_UI
+ SG_ Perception_Total_Runs : 8|8@1+ (1,0) [0|255] "count"  PC_UI
+ SG_ Perception_Detected_Runs : 0|8@1+ (1,0) [0|255] "count"  PC_UI
+
+BO_ 262 Planning_Status: 8 Jeston
+ SG_ Alive_Counter_106 : 56|8@1+ (1,0) [0|255] "count"  PC_UI
+ SG_ Reserved_106_6 : 48|8@1+ (1,0) [0|255] ""  PC_UI
+ SG_ Reserved_106_5 : 40|8@1+ (1,0) [0|255] ""  PC_UI
+ SG_ Planning_State : 32|8@1+ (1,0) [0|3] ""  PC_UI
+ SG_ PathPlan_Total_Runs : 24|8@1+ (1,0) [0|255] "count"  PC_UI
+ SG_ PathPlan_Success_Runs : 16|8@1+ (1,0) [0|255] "count"  PC_UI
+ SG_ PathPlan_Last_ms : 0|16@1+ (1,0) [0|65535] "ms"  PC_UI
+
+BO_ 260 Route_Status: 8 Jeston
+ SG_ Alive_Counter_104 : 56|8@1+ (1,0) [0|255] "count"  PC_UI
+ SG_ Route_State : 48|8@1+ (1,0) [0|255] ""  PC_UI
+ SG_ Mission_Success : 32|16@1+ (0.1,0) [0|100] "%"  PC_UI
+ SG_ Amcl_Error : 16|16@1- (0.01,0) [-327.68|327.67] "m"  PC_UI
+ SG_ Route_Progress : 0|16@1+ (0.1,0) [0|6553.5] "m"  PC_UI
+
+BO_ 259 System_Resource: 8 Jeston
+ SG_ Alive_Counter_103 : 56|8@1+ (1,0) [0|255] "count"  PC_UI
+ SG_ Camera_Status : 48|8@1+ (1,0) [0|255] "bitflag"  PC_UI
+ SG_ Pi5_Status : 40|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Can_Loss_Rate : 32|8@1+ (0.1,0) [0|25.5] "%"  PC_UI
+ SG_ Bus_Load : 24|8@1+ (1,0) [0|100] "%"  PC_UI
+ SG_ Session_Rate : 16|8@1+ (1,0) [0|255] "Hz"  PC_UI
+ SG_ Swap_Usage : 8|8@1+ (1,0) [0|100] "%"  PC_UI
+ SG_ Ram_Usage : 0|8@1+ (1,0) [0|100] "%"  PC_UI
+
+BO_ 511 Fail_Safe_Event: 8 Jeston
+ SG_ Event_Counter : 56|8@1+ (1,0) [0|255] "count"  PC_UI
+ SG_ Fail_Safe_Level_Event : 48|8@1+ (1,0) [0|4] "level"  PC_UI
+ SG_ Timestamp_ms : 16|32@1+ (1,0) [0|4294967295] "ms"  PC_UI
+ SG_ Reason_Code : 8|8@1+ (1,0) [0|255] ""  PC_UI
+ SG_ Event_Code : 0|8@1+ (1,0) [0|255] ""  PC_UI
+
+BO_ 258 Realtime_KPI: 8 Jeston
+ SG_ Alive_Counter_102 : 40|8@1+ (1,0) [0|255] "count"  PC_UI
+ SG_ Path_Error : 48|16@1- (1,0) [-32768|32767] "mm"  PC_UI
+ SG_ Gpu_Temperature : 32|8@1+ (1,0) [0|125] "degC"  PC_UI
+ SG_ CPU_Usage : 24|8@1+ (1,0) [0|100] "%"  PC_UI
+ SG_ Gpu_Usage : 16|8@1+ (1,0) [0|100] "%"  PC_UI
+ SG_ Inference_Latency : 0|16@1+ (1,0) [0|65535] "ms"  PC_UI
+
+BO_ 257 Vehicle_Status: 8 Jeston
+ SG_ Alive_Counter_101 : 56|8@1+ (1,0) [0|255] "count"  PC_UI
+ SG_ Control_Enable : 48|8@1+ (1,0) [0|1] ""  PC_UI
+ SG_ Yolo_Mode : 40|8@1+ (1,0) [0|255] ""  PC_UI
+ SG_ Driving_State : 32|8@1+ (1,0) [0|255] ""  PC_UI
+ SG_ Steering_Angle : 16|16@1- (0.1,0) [-3276.8|3276.7] "deg"  PC_UI
+ SG_ Vehicle_Speed : 0|16@1- (0.01,0) [-327.68|327.67] "m/s"  PC_UI
+
+BO_ 256 Obstacle_Detection: 8 Jeston
+ SG_ Alive_Counter_100 : 56|8@1+ (1,0) [0|255] "count"  PC_UI
+ SG_ Fail_Safe_Level : 48|8@1+ (1,0) [1|4] "level"  PC_UI
+ SG_ Confidence : 40|8@1+ (0.5,0) [0|100] "%"  PC_UI
+ SG_ Class_Id : 32|8@1+ (1,0) [0|255] ""  PC_UI
+ SG_ Obstacle_Angle : 16|16@1- (0.1,0) [-3276.8|3276.7] "deg"  PC_UI
+ SG_ Obstacle_Distance : 0|16@1+ (0.01,0) [0|655.35] "m"  PC_UI
+
+
+BO_ 266 Localization_Status: 8 Jeston
+ SG_ Loc_Counter : 56|8@1+ (1,0) [0|255] "count"  PC_UI
+ SG_ Loc_Lane_Dev : 16|16@1- (1,0) [-32768|32767] "mm"  PC_UI
+ SG_ Loc_Quality : 8|8@1+ (1,0) [0|100] "%"  PC_UI
+ SG_ Loc_Mode : 0|8@1+ (1,0) [0|3] ""  PC_UI
+
+BO_ 267 Behavior_State: 8 Jeston
+ SG_ Behavior_Counter : 56|8@1+ (1,0) [0|255] "count"  PC_UI
+ SG_ Behavior_Mode : 0|8@1+ (1,0) [0|4] ""  PC_UI
+
+BO_ 268 Map_Info: 8 Jeston
+ SG_ Map_Mux M : 0|8@1+ (1,0) [0|1] ""  PC_UI
+ SG_ Map_Version : 48|8@1+ (1,0) [0|255] ""  PC_UI
+ SG_ Map_Info_Counter : 56|8@1+ (1,0) [0|255] "count"  PC_UI
+ SG_ Map_Origin_X m0 : 8|16@1- (0.01,0) [-327|327] "m"  PC_UI
+ SG_ Map_Origin_Y m0 : 24|16@1- (0.01,0) [-327|327] "m"  PC_UI
+ SG_ Map_Resolution m0 : 40|8@1+ (0.001,0) [0|0.255] "m"  PC_UI
+ SG_ Map_Width m1 : 8|16@1+ (1,0) [0|65535] "px"  PC_UI
+ SG_ Map_Height m1 : 24|16@1+ (1,0) [0|65535] "px"  PC_UI
+
+BO_ 269 Ego_Pose: 8 Jeston
+ SG_ Ego_Counter : 56|8@1+ (1,0) [0|255] "count"  PC_UI
+ SG_ Ego_Yaw : 32|16@1- (0.1,0) [-180|180] "deg"  PC_UI
+ SG_ Ego_Y : 16|16@1- (0.01,0) [-327|327] "m"  PC_UI
+ SG_ Ego_X : 0|16@1- (0.01,0) [-327|327] "m"  PC_UI
+
+
+
+CM_ BO_ 258 "100ms";
+CM_ BO_ 257 "20ms";
+CM_ BO_ 256 "20ms; highest-priority Jetson-to-PC_UI status frame in the 0x100 block because obstacle and fail-safe level are time-critical";
+CM_ BO_ 16 "Jetson to STM32 high level control command. Target speed and steering angle are converted to motor PWM and steering PWM inside STM32. Alive_Counter_010 is used for command timeout detection.";
+CM_ BO_ 32 "STM32 to Jetson encoder feedback. Left_Count and Right_Count are signed int32 cumulative wheel encoder counts from 17PPR Hall sensor motor encoders.";
+CM_ BO_ 33 "STM32 to Jetson BNO055 I2C IMU feedback for EKF. Includes yaw, gyro z, roll, and pitch. Calibration status values are intentionally not included in this runtime frame.";
+CM_ BO_ 261 "1s";
+CM_ BO_ 264 "1s; map datum origin frame. Latitude and longitude are encoded as signed int32 degrees times 1e7.";
+CM_ BO_ 265 "100ms";
+CM_ BO_ 263 "100ms";
+CM_ BO_ 262 "100ms";
+CM_ BO_ 260 "100ms";
+CM_ BO_ 259 "100ms";
+CM_ BO_ 511 "Event-driven fail-safe notification/log frame. This reports fail-safe transitions; it is not the high-priority actuator stop command";
+CM_ BO_ 512 "Dashboard-to-Jetson request frame, sent on UI button press. E-stop request is carried only by Estop_Command; actuator stop should be issued via STM32_Control_Command.Control_Flag=E_Stop";
+CM_ BO_ 513 "Dashboard-to-Jetson goal pose frame. The PC UI sends this after map click conversion into the shared map/ENU coordinate frame.";
+CM_ BO_ 266 "Jetson-to-PC_UI localization source/quality + lane-center deviation. UI placeholder until firmware sends.";
+CM_ BO_ 267 "Jetson-to-PC_UI behavior FSM state (LANE_FOLLOW/OBSTACLE_STOP/NUDGE/OVERTAKE/RESUME). UI placeholder until firmware sends.";
+CM_ BO_ 268 "Jetson-to-PC_UI occupancy-map metadata (multiplexed origin/resolution + width/height + version) for the Tactical map-mismatch check. Image never on CAN.";
+CM_ BO_ 269 "Jetson-to-PC_UI map-frame ego pose (x/y/yaw) for the Tactical view (from /amcl_pose).";
+CM_ SG_ 16 Control_Flag "High priority actuator control flag. Use value 255 E_Stop for emergency stop toward STM32.";
+CM_ SG_ 16 Alive_Counter_010 "Jetson command alive counter. STM32 should stop actuators if this command frame is not refreshed within the configured timeout.";
+CM_ SG_ 32 Left_Count "Signed int32 cumulative left wheel encoder count.";
+CM_ SG_ 32 Right_Count "Signed int32 cumulative right wheel encoder count.";
+CM_ SG_ 33 IMU_Yaw_deg "BNO055 yaw angle in degrees. Jetson may apply initial yaw offset before EKF use.";
+CM_ SG_ 33 IMU_GyroZ_dps "BNO055 z axis angular velocity in degrees per second.";
+CM_ SG_ 512 Estop_Command "UI request only. Sole E-stop request signal in UI_Command. Jetson should translate this request to STM32_Control_Command.Control_Flag=E_Stop for actuator stop";
+CM_ SG_ 512 Command_Id "Generic UI command selector. Do not encode E-stop here; use Estop_Command for emergency stop requests";
+CM_ SG_ 512 Destination_Select "Preset navigation destination request (Start/Parking/Charge/Garage), paired with Command_Id=Set_Destination";
+BA_DEF_  "MultiplexExtEnabled" ENUM  "No","Yes";
+BA_DEF_  "BusType" STRING ;
+BA_DEF_ BO_  "GenMsgCycleTime" INT 0 65535;
+BA_DEF_ BU_  "NodeLayerModules" STRING ;
+BA_DEF_ BU_  "ECU" STRING ;
+BA_DEF_ BU_  "CANoeJitterMax" INT 0 0;
+BA_DEF_ BU_  "CANoeJitterMin" INT 0 0;
+BA_DEF_ BU_  "CANoeDrift" INT 0 0;
+BA_DEF_ BU_  "CANoeStartDelay" INT 0 0;
+BA_DEF_DEF_  "MultiplexExtEnabled" "No";
+BA_DEF_DEF_  "BusType" "";
+BA_DEF_DEF_  "GenMsgCycleTime" 0;
+BA_DEF_DEF_  "NodeLayerModules" "";
+BA_DEF_DEF_  "ECU" "";
+BA_DEF_DEF_  "CANoeJitterMax" 0;
+BA_DEF_DEF_  "CANoeJitterMin" 0;
+BA_DEF_DEF_  "CANoeDrift" 0;
+BA_DEF_DEF_  "CANoeStartDelay" 0;
+BA_ "BusType" "CAN";
+BA_ "GenMsgCycleTime" BO_ 16 20;
+BA_ "GenMsgCycleTime" BO_ 32 20;
+BA_ "GenMsgCycleTime" BO_ 33 20;
+BA_ "GenMsgCycleTime" BO_ 256 20;
+BA_ "GenMsgCycleTime" BO_ 257 20;
+BA_ "GenMsgCycleTime" BO_ 258 100;
+BA_ "GenMsgCycleTime" BO_ 259 100;
+BA_ "GenMsgCycleTime" BO_ 260 100;
+BA_ "GenMsgCycleTime" BO_ 261 100;
+BA_ "GenMsgCycleTime" BO_ 262 100;
+BA_ "GenMsgCycleTime" BO_ 263 100;
+BA_ "GenMsgCycleTime" BO_ 264 1000;
+BA_ "GenMsgCycleTime" BO_ 265 100;
+BA_ "GenMsgCycleTime" BO_ 266 100;
+BA_ "GenMsgCycleTime" BO_ 267 100;
+BA_ "GenMsgCycleTime" BO_ 268 1000;
+BA_ "GenMsgCycleTime" BO_ 269 100;
+BA_ "GenMsgCycleTime" BO_ 511 0;
+BA_ "GenMsgCycleTime" BO_ 512 0;
+BA_ "GenMsgCycleTime" BO_ 513 0;
+VAL_ 512 Estop_Command 1 "E_Stop_Request" 0 "Normal" ;
+VAL_ 512 Amcl_Command 1 "AMCL_Init_Request" 0 "No_Request" ;
+VAL_ 512 Model_Select 2 "YOLO26n" 1 "YOLO26s" 0 "None" ;
+VAL_ 512 Precision_Mode 3 "INT8" 2 "FP16" 1 "FP32" 0 "No_Change" ;
+VAL_ 512 Command_Id 5 "Set_Destination" 4 "Reserved" 3 "AMCL_Init" 2 "Set_Model" 1 "Set_Precision" 0 "No_Command" ;
+VAL_ 512 Destination_Select 4 "Garage" 3 "Charge_Station" 2 "Parking" 1 "Start" 0 "None" ;
+VAL_ 513 Goal_Valid_Flag 1 "Valid" 0 "Invalid" ;
+VAL_ 259 Pi5_Status 3 "Error" 2 "Timeout" 1 "Online" 0 "No_Data" ;
+VAL_ 261 Jetson_Model 1 "Orin" 0 "Unknown" ;
+VAL_ 511 Fail_Safe_Level_Event 4 "Emergency_Stop" 3 "LiDAR_Only" 2 "Light_Overload" 1 "Heavy_Normal" ;
+VAL_ 511 Reason_Code 8 "Pi5_Fail" 7 "Path_Fail" 6 "AMCL_Unstable" 5 "UART_Fail" 4 "Camera_Fail" 3 "LiDAR_Fail" 2 "Inference_Delay" 1 "GPU_Overload" 0 "None" ;
+VAL_ 511 Event_Code 5 "Communication_Fail" 4 "Path_Fail" 3 "Sensor_Fail" 2 "Emergency_stop" 1 "Fail_Safe_Changed" 0 "No_Event" ;
+VAL_ 257 Control_Enable 1 "Enable" 0 "Disable" ;
+VAL_ 257 Yolo_Mode 5 "LiDAR_Only" 4 "YOLO26n_INT8" 3 "YOLO26s_INT8" 2 "YOLO26s_FP16" 1 "YOLO26s_FP32" 0 "Off" ;
+VAL_ 257 Driving_State 5 "Error" 4 "Stop" 3 "Avoidance" 2 "Autonomous" 1 "Manual" 0 "Idle" ;
+VAL_ 265 Network_Status 3 "Error" 2 "Timeout" 1 "Online" 0 "No_Data" ;
+VAL_ 262 Planning_State 3 "Fail" 2 "Success" 1 "Planning" 0 "No_Data" ;
+VAL_ 16 Driving_State_Cmd 5 "Error" 4 "Stop" 3 "Avoidance" 2 "Autonomous" 1 "Manual" 0 "Idle" ;
+VAL_ 16 Control_Flag 255 "E_Stop" 1 "Encoder_Reset" 0 "Normal" ;
+VAL_ 266 Loc_Mode 3 "GPS" 2 "ODOM" 1 "AMCL" 0 "INIT" ;
+VAL_ 267 Behavior_Mode 4 "RESUME" 3 "OVERTAKE" 2 "NUDGE" 1 "OBSTACLE_STOP" 0 "LANE_FOLLOW" ;

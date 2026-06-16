@@ -1,0 +1,30 @@
+# ── Build output ─────────────────────────────────────────────
+/build/
+/build-release/
+/build-linux/
+build*/
+*.user
+CMakeCache.txt
+CMakeFiles/
+*.obj
+*.o
+*.a
+
+# ── Distributable package (shipped via GitHub Releases) ──────
+/dist/
+
+# ── Local working / scratch ──────────────────────────────────
+/backups/
+backup_*/
+report_*.txt
+report_*.zip
+report_unzipped/
+/tasks/
+/kpi_design/
+.qtcreator/
+
+# ── OS / editor ──────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/

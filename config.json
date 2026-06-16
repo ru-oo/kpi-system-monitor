@@ -1,0 +1,121 @@
+{
+  "_comment": "Static project configuration. Loaded once at startup. Values that change at runtime live on CAN; values that come from offline benchmarks (YOLO mAP) or are operational targets/labels live here.",
+
+  "accuracy": {
+    "_comment": "YOLO project benchmark per model & precision. map50 / map50_95 (%). The §4.2 mAP-loss KPI uses map50_95 (FP32 vs INT8). Active values follow the selected Yolo_Mode model (0x101). Update when retraining.",
+    "yolo26s": {
+      "fp32": { "map50": 62.33, "map50_95": 40.91 },
+      "fp16": { "map50": 62.35, "map50_95": 40.89 },
+      "int8": { "map50": 52.79, "map50_95": 30.04 }
+    },
+    "yolo26n": {
+      "fp32": { "map50": 59.22, "map50_95": 37.64 },
+      "fp16": { "map50": 59.16, "map50_95": 37.57 },
+      "int8": { "map50": 52.73, "map50_95": 29.54 }
+    }
+  },
+
+  "model": {
+    "pt_baseline_ms": 68,
+    "default_opt_mode": "INT8",
+    "default_yolo_model": "YOLO26s",
+    "perception_hz": 10,
+    "realtime_kpi_hz": 10,
+    "vehicle_status_hz": 50,
+    "_fp16_speedup_comment": "Reference FP16 speedup for the Safety/AI comparison chart (the deployed system runs INT8; the live INT8 speedup is computed from 0x102 inference latency).",
+    "fp16_speedup_ref": 2.2
+  },
+
+  "targets": {
+    "_comment": "Acceptance thresholds from the §4.2 KPI table in the project report. Used by the KPI Validation page to color-code each metric.",
+    "inference_ms_max": 150,
+    "speedup_ratio_min": 3.0,
+    "map_loss_pct_max": 1.5,
+    "path_deviation_mm_max": 300,
+    "can_tx_latency_ms_max": 10,
+    "detect_latency_ms_max": 200,
+    "mission_success_pct_min": 70,
+    "speed_kmh_min": 3,
+    "speed_kmh_max": 5,
+    "route_length_m": 250,
+    "localization_success_runs_min": 7,
+    "path_plan_ms_max": 2000,
+    "path_plan_success_runs_min": 9,
+    "parking_detect_runs_min": 8,
+    "false_positive_per_run_max": 1,
+    "trigger_accuracy_pct_min": 90,
+    "fs_transition_ms_max": 100,
+    "can_loss_pct_max": 0.1,
+    "runs_total": 10,
+    "perception_confidence_min": 0.70,
+    "path_plan_chart_max_ms": 2400,
+    "path_deviation_chart_max_mm": 500,
+    "failsafe_dwell_ms": 1500,
+    "lane_center_dev_mm_max": 500
+  },
+
+  "can": {
+    "_comment": "plugin/device pin a fixed adapter so a bare double-click finds it (no env vars needed). CANable in slcan mode: plugin 'slcan' + device 'COMx' (Windows) or '/dev/ttyACM0' (Linux). Leave both empty to auto-detect / fall back to the simulated bus. KPI_CAN_PLUGIN / KPI_CAN_DEVICE env vars override these.",
+    "default_bitrate": 500000,
+    "termination_ohm": 120,
+    "plugin": "slcan",
+    "device": "COM4"
+  },
+
+  "link": {
+    "_comment": "Split deployment over UDP (phone-hotspot WiFi). mode: 'standalone' (CAN + UI in one process, default), 'bridge' (laptop: reads CAN, forwards coalesced physical-data snapshots, headless), 'client' (iPad: receives snapshots → UI, sends commands back). Override mode with env KPI_MODE. bridge_host = the laptop's hotspot IP that the iPad sends commands to; the bridge learns the iPad's address automatically from the first packet (no hardcoded client IP).",
+    "mode": "standalone",
+    "bridge_host": "192.168.137.1",
+    "snapshot_port": 45100,
+    "command_port": 45101,
+    "snapshot_hz": 50
+  },
+
+  "debug": {
+    "_comment": "Jetson debug console (Debug page). 'host' = the Jetson's IP; each dashboard sends a HELLO so the Jetson learns the (possibly different) viewer IPs and pushes /debug lines back to all of them. Leave host empty to disable. Override with env KPI_DEBUG_HOST. port = the Jetson node's listen port; local_port = where this dashboard receives.",
+    "host": "",
+    "port": 45103,
+    "local_port": 45102
+  },
+
+  "hardware": {
+    "_comment": "Fallbacks for values not always present on CAN. ram_total_gb_fallback is used until 0x105 Hardware_Info arrives; swap has no CAN total signal. sensor_stale_*_ms = how long without the sensor's heartbeat frame before it's flagged stale (LiDAR=0x100, IMU=0x21, encoder=0x20, ego-pose=0x10D @100ms cycle). Raise if the firmware publishes that frame less often than expected.",
+    "ram_total_gb_fallback": 8,
+    "swap_total_gb": 4,
+    "mission_total": 10,
+    "sensor_stale_lidar_ms": 1000,
+    "sensor_stale_imu_ms": 500,
+    "sensor_stale_enc_ms": 500,
+    "sensor_stale_ego_ms": 700
+  },
+
+  "ui": {
+    "_comment": "Worker→UI dispatcher poll interval (ms). Per mentor feedback: spending the full 60fps frame budget (16ms) on data processing risks bottleneck — half the budget (8ms) lets the dispatcher run twice per frame, leaving headroom for rendering. Raise to 16 (60fps) or 33 (30fps) on the Jetson if the device can't sustain 8ms cadence.",
+    "poll_interval_ms": 8,
+    "platform_label": "Jetson Orin Nano",
+    "model_family": "YOLO26",
+    "team_label": "Team 02"
+  },
+
+  "tactical": {
+    "_comment": "SLAM-map-backed Tactical page. map_path = ROS map .yaml (PGM sibling auto-loaded). map_version must match the Jetson's Map_Info broadcast or the UI shows MAP MISMATCH and disables goal-setting. route_* are the interim ego-pose stopgap (straight route only) until an Ego_Pose CAN message exists.",
+    "map_path": "maps/straight_road.yaml",
+    "lane_path": "maps/testarea_all_local.json",
+    "_datum_comment": "통일 datum(35.8341190/128.6862139). Local-frame origin (WGS84). Demo virtual bus broadcasts this as Map_Datum (0x108); real Jetson sends the live one. HD lanes are ENU-converted at runtime against it.",
+    "datum_lat": 35.8341190,
+    "datum_lon": 128.6862139,
+    "map_version": 1,
+    "campaign": "dev",
+    "_view_comment": "Map-mismatch tolerances (origin m / resolution m-per-px), zoom bounds, texture cap (px), and the first-load focus span (m across the plot, centered on the datum).",
+    "map_origin_tol_m": 0.05,
+    "map_resolution_tol_m": 0.001,
+    "map_texture_limit_px": 15000,
+    "map_zoom_min": 1.0,
+    "map_zoom_max": 12.0,
+    "map_focus_span_m": 150,
+    "_route_start_comment": "legacy 임시값 — Ego_Pose(0x10D) 라이브 수신 시 미사용(straight-route 폴백 전용). 삭제 보류.",
+    "route_start_x": 0.0,
+    "route_start_y": 0.0,
+    "route_heading_deg": 0.0
+  }
+}
