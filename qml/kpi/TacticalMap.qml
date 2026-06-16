@@ -434,7 +434,11 @@ KpiPanel {
                     if (panel.pending)
                         drawGoal(ctx, mapArea.ax(panel.pendingX, panel.pendingY), mapArea.ay(panel.pendingX, panel.pendingY), panel.pendingYaw, theme.primaryOnDark)
 
-                    if (kpiData.hasVehicle) {
+                    // Show the ego whenever we have a pose (0x10D Ego_Pose) OR the
+                    // vehicle is alive (0x101 → straight-route stopgap). Was gated on
+                    // hasVehicle only, so a robot sending Ego_Pose without Vehicle_Status
+                    // showed no ego on the map.
+                    if (kpiData.hasEgoPose || kpiData.hasVehicle) {
                         var ex = mapArea.ax(mapArea.egoMx, mapArea.egoMy)
                         var ey = mapArea.ay(mapArea.egoMx, mapArea.egoMy)
                         // True heading = ego yaw (0x10D). Draw a triangular arrow
