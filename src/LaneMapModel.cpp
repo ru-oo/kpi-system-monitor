@@ -10,12 +10,28 @@
 #include <cmath>
 #include <limits>
 
-// Equidistant ENU approximation (cm-level error over a few hundred metres —
-// plenty for this demo). x = East metres, y = North metres, relative to datum.
+// WGS84 geodetic -> local ENU via ECEF (정밀 측지 변환). x=East m, y=North m,
+// relative to datum. 시스템(gps_enu_bridge·map_offset)이 ecef_enu라 UI도 동일
+// 모델로 통일 — equirectangular 근사와는 이 구역에서 ~0.95 m 어긋나 ego/지도가
+// 틀어졌었다(2026-06-15 mapcal로 시스템이 ecef로 바뀐 뒤 UI만 옛 모델로 남음).
 static QPointF toEnu(double lat, double lon, double lat0, double lon0) {
-    const double D = M_PI / 180.0, R = 6378137.0;
-    const double east  = (lon - lon0) * D * R * std::cos(lat0 * D);
-    const double north = (lat - lat0) * D * R;
+    const double D = M_PI / 180.0, A = 6378137.0;
+    const double F = 1.0 / 298.257223563, E2 = F * (2.0 - F);
+    auto ecef = [&](double la, double lo, double &X, double &Y, double &Z) {
+        const double s = std::sin(la * D), c = std::cos(la * D);
+        const double N = A / std::sqrt(1.0 - E2 * s * s);
+        X = N * c * std::cos(lo * D);
+        Y = N * c * std::sin(lo * D);
+        Z = (N * (1.0 - E2)) * s;
+    };
+    double x0, y0, z0, x, y, z;
+    ecef(lat0, lon0, x0, y0, z0);
+    ecef(lat, lon, x, y, z);
+    const double dx = x - x0, dy = y - y0, dz = z - z0;
+    const double sl = std::sin(lat0 * D), cl = std::cos(lat0 * D);
+    const double so = std::sin(lon0 * D), co = std::cos(lon0 * D);
+    const double east  = -so * dx + co * dy;
+    const double north = -sl * co * dx - sl * so * dy + cl * dz;
     return QPointF(east, north);
 }
 
