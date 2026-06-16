@@ -153,8 +153,10 @@ int main(int argc, char *argv[])
     });
     // Seed the datum from config NOW so WGS84 HD lanes render immediately, even
     // with no CAN / before the live Map_Datum (0x108) arrives. A live 0x108
-    // overrides this via datumChanged above. (Local-metre lane files ignore it.)
+    // overrides this via datumChanged above (only if it's plausible — see
+    // setReferenceDatum/applyMapDatum, which reject (0,0)/garbage datums).
     laneMap.setDatum(config.datumLat(), config.datumLon());
+    kpiData.setReferenceDatum(config.datumLat(), config.datumLon());
 
     // ── Lane-center deviation from the HD map (replaces raw 0x10A) ──────
     // Signed lateral distance of the ego to the nearest HD centerline. The raw

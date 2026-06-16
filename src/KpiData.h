@@ -253,9 +253,21 @@ public:
     double datumLat() const { return m_datumLat; }
     double datumLon() const { return m_datumLon; }
     void   applyMapDatum(double lat, double lon) {
+        // Reject an implausible live datum. Before localization initializes the
+        // Jetson can send (0,0) or a corrupted value; applying it would re-project
+        // the HD lanes thousands of km away and push the ego off the map (and make
+        // lane-center deviation astronomical). Keep the config / last-good datum
+        // until a sane one (near the expected test-area datum) arrives.
+        if (lat < -90.0 || lat > 90.0 || lon < -180.0 || lon > 180.0) return;
+        if (m_hasRefDatum && (qAbs(lat - m_refDatumLat) > 0.5 || qAbs(lon - m_refDatumLon) > 0.5))
+            return;   // > ~50 km from the expected datum → garbage, ignore
         if (m_hasDatum && qFuzzyCompare(lat, m_datumLat) && qFuzzyCompare(lon, m_datumLon)) return;
         m_hasDatum = true; m_datumLat = lat; m_datumLon = lon;
         emit datumChanged();
+    }
+    // Expected datum (from config) — used to sanity-check live 0x108 datums above.
+    void   setReferenceDatum(double lat, double lon) {
+        m_refDatumLat = lat; m_refDatumLon = lon; m_hasRefDatum = true;
     }
 
 
@@ -590,6 +602,8 @@ private:
     // Map_Datum (0x108)
     bool   m_hasDatum = false;
     double m_datumLat = 0, m_datumLon = 0;
+    bool   m_hasRefDatum = false;            // expected datum (config) for sanity-checking live ones
+    double m_refDatumLat = 0, m_refDatumLon = 0;
 
     // A7 — AMCL error binned by feature/gap zone
 
