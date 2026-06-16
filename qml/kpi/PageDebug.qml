@@ -118,6 +118,7 @@ Item {
                         Text { text: model.t; color: theme.bodyDim; font.family: theme.monoFont.family; font.pixelSize: 12; width: 64 }
                         Text { text: model.lv; color: page.levelColor(model.lv); font.family: theme.monoFont.family; font.weight: Font.Bold; font.pixelSize: 12; width: 46 }
                         Text {
+                            id: msgT
                             text: model.msg; color: theme.bodyText
                             font.family: theme.monoFont.family; font.pixelSize: 13
                             width: parent.width - 64 - 46 - 20
