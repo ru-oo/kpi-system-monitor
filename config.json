@@ -100,7 +100,7 @@
   "tactical": {
     "_comment": "SLAM-map-backed Tactical page. map_path = ROS map .yaml (PGM sibling auto-loaded). map_version must match the Jetson's Map_Info broadcast or the UI shows MAP MISMATCH and disables goal-setting. route_* are the interim ego-pose stopgap (straight route only) until an Ego_Pose CAN message exists.",
     "map_path": "maps/straight_road.yaml",
-    "lane_path": "maps/testarea_all_local.json",
+    "lane_path": "maps/testarea_all_enu.json",
     "_datum_comment": "통일 datum(35.8341190/128.6862139). Local-frame origin (WGS84). Demo virtual bus broadcasts this as Map_Datum (0x108); real Jetson sends the live one. HD lanes are ENU-converted at runtime against it.",
     "datum_lat": 35.8341190,
     "datum_lon": 128.6862139,

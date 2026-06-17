@@ -122,6 +122,7 @@ bool LaneMapModel::loadLanes(const QString &path) {
     m_hasLocalOrigin = false;
     if (m_isLocalMetre) {
         QJsonValue ov = root.value("origin_wgs84");
+        if (!ov.isArray()) ov = root.value("enu_origin_wgs84");   // testarea_all_enu.json key
         if (!ov.isArray()) ov = root.value("origin");
         const QJsonArray oa = ov.toArray();
         if (oa.size() >= 2) {
