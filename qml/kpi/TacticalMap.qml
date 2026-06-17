@@ -450,16 +450,24 @@ KpiPanel {
                         ctx.strokeStyle = theme.bodyDim; ctx.lineWidth = 2; ctx.lineCap = "round"
                         ctx.beginPath(); ctx.moveTo(ex, ey)
                         ctx.lineTo(ex + Math.cos(sh) * 16, ey - Math.sin(sh) * 16); ctx.stroke()
-                        // heading arrow — filled triangle
-                        var ax0 = ex + Math.cos(hh) * 26, ay0 = ey - Math.sin(hh) * 26   // tip
+                        // heading arrow. 0x10D Ego_X/Y is the vehicle reference
+                        // point (base_link), not the front bumper. Keep the
+                        // triangle's visual centroid on ex/ey so the marker does
+                        // not appear ahead of the real vehicle.
+                        var tipPx = 18
+                        var rearPx = 9
+                        var halfW = 8
+                        var ax0 = ex + Math.cos(hh) * tipPx, ay0 = ey - Math.sin(hh) * tipPx
                         var lh = hh + Math.PI * 0.5, rh = hh - Math.PI * 0.5
+                        var bx = ex - Math.cos(hh) * rearPx
+                        var by = ey + Math.sin(hh) * rearPx
                         ctx.fillStyle = theme.primaryOnDark
                         ctx.beginPath()
                         ctx.moveTo(ax0, ay0)
-                        ctx.lineTo(ex + Math.cos(lh) * 7, ey - Math.sin(lh) * 7)
-                        ctx.lineTo(ex + Math.cos(rh) * 7, ey - Math.sin(rh) * 7)
+                        ctx.lineTo(bx + Math.cos(lh) * halfW, by - Math.sin(lh) * halfW)
+                        ctx.lineTo(bx + Math.cos(rh) * halfW, by - Math.sin(rh) * halfW)
                         ctx.closePath(); ctx.fill()
-                        // body dot
+                        // base_link reference point
                         ctx.fillStyle = theme.primaryOnDark
                         ctx.beginPath(); ctx.arc(ex, ey, 7, 0, 2*Math.PI); ctx.fill()
                         ctx.fillStyle = theme.tile1
