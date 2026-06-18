@@ -221,6 +221,11 @@ class KpiData : public QObject {
     Q_PROPERTY(QString localizationMode    READ localizationMode    NOTIFY localizationChanged)  // AMCL/ODOM/GPS/INIT
     Q_PROPERTY(double  localizationQuality READ localizationQuality NOTIFY localizationChanged)  // 0..1
     Q_PROPERTY(bool    localizationFromCan READ localizationFromCan NOTIFY localizationChanged)
+    // RPi camera lane deviation (0x10A Loc_Lane_Dev) — distinct from the HD-map
+    // computed laneCenterDeviationMm. piLaneOk = the 0x10A stream is fresh.
+    Q_PROPERTY(double  piLaneDevMm         READ piLaneDevMm         NOTIFY localizationChanged)
+    Q_PROPERTY(bool    hasPiLaneDev        READ hasPiLaneDev        NOTIFY localizationChanged)
+    Q_PROPERTY(bool    piLaneOk            READ piLaneOk            NOTIFY sensorHealthChanged)
 
     // B2 — behavior FSM state. Derived placeholder until a real 0x109
     // Behavior_State arrives (then applyBehaviorState overrides).
@@ -275,14 +280,21 @@ public:
     QString localizationMode() const    { return m_locMode; }
     double  localizationQuality() const { return m_locQuality; }
     bool    localizationFromCan() const { return m_locFromCan; }
+    double  piLaneDevMm() const         { return m_piLaneDevMm; }
+    bool    hasPiLaneDev() const        { return m_hasPiLaneDev; }
+    bool    piLaneOk() const            { return m_piLaneOk; }
     // Real-signal entry point (TODO(CAN): 0x108 Localization_Status). Mode enum:
     // DBC Loc_Mode: 0 INIT, 1 (localized/EKF), 2 ODOM, 3 GPS. quality 0..1.
     // Post-AMCL the "localized" state is the EKF fusion output, so we label it
     // "EKF" (no "AMCL" string in the UI). The DBC enum value is unchanged.
-    void applyLocalizationStatus(int mode, double quality) {
+    void applyLocalizationStatus(int mode, double quality, double laneDevMm) {
         m_locFromCan = true;
         m_locMode = (mode == 1) ? "EKF" : (mode == 2) ? "ODOM" : (mode == 3) ? "GPS" : "INIT";
         m_locQuality = quality;
+        m_piLaneDevMm = laneDevMm; m_hasPiLaneDev = true;
+        m_lastLocRxTimer.start();   // 0x10A heartbeat → watchdog flips piLaneOk. The
+                                    // Jetson stops 0x10A when the RPi lane stream goes
+                                    // stale, so freezing the counter = honest "no data".
         emit localizationChanged();
     }
 
@@ -763,10 +775,14 @@ private:
     QElapsedTimer m_lastImuRxTimer;
     QElapsedTimer m_lastEncRxTimer;
     QElapsedTimer m_lastEgoRxTimer;
+    QElapsedTimer m_lastLocRxTimer;   // 0x10A heartbeat (RPi lane deviation)
     bool          m_lidarOk = false;
     bool          m_imuOk = false;
     bool          m_encoderOk = false;
     bool          m_egoOk = false;
+    bool          m_piLaneOk = false;
+    bool          m_hasPiLaneDev = false;
+    double        m_piLaneDevMm = 0.0;
     bool          m_hasEncoder = false;
     int           m_encLeft = 0, m_encRight = 0;
     // Sensor stale windows (ms). Config-injected from main.cpp (config.hardware);
@@ -776,4 +792,5 @@ private:
     qint64 m_imuStaleMs   = 500;    // without 0x21
     qint64 m_encStaleMs   = 500;    // without 0x20
     qint64 m_egoStaleMs   = 700;    // without 0x10D (100ms cycle) = ego pose stale/frozen
+    qint64 m_locStaleMs   = 600;    // without 0x10A (RPi lane, 100ms cycle, Jetson holds ~0.5s) = stale
 };

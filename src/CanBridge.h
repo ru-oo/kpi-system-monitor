@@ -213,6 +213,7 @@ private:
 
     QByteArray buildObstacleFrame();
     QByteArray buildVehicleStatusFrame();
+    QByteArray buildLocalizationFrame();
     QByteArray buildRealtimeKpiFrame();
     QByteArray buildSystemResourceFrame();
     QByteArray buildRouteStatusFrame();
@@ -289,6 +290,7 @@ private:
     double m_vPathErr  = 110.0;
     double m_vSpeedMs  = 1.2;
     double m_vSteer    = 0.0;
+    double m_vLaneDev  = 0.0;   // demo RPi lane deviation (mm) for 0x10A
     // Virtual mission state machine (demo): 0 IDLE, 2 AUTO. Starts IDLE so the
     // operator can set a goal (track touch / popup); a goal promotes to AUTO,
     // and arrival returns to IDLE. Lets the demo exercise the Target Lock.
@@ -313,6 +315,7 @@ private:
     double m_vMissionPct = 70.0;
     quint8 m_vCounter100 = 0;
     quint8 m_vCounter101 = 0;
+    quint8 m_vCounter10A = 0;   // 0x10A Loc_Counter (demo alive)
     quint8 m_vCounter102 = 0;
     quint8 m_vCounter103 = 0;
     quint8 m_vCounter104 = 0;

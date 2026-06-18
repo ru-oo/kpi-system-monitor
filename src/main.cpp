@@ -403,10 +403,10 @@ int main(int argc, char *argv[])
         if (v.datumDirty)
             kpiData.applyMapDatum(v.datumLat, v.datumLon);
         if (v.locDirty)
-            kpiData.applyLocalizationStatus(v.locMode, v.locQuality);
-        // NOTE: lane-center deviation is NOT taken from the raw 0x10A Loc_Lane_Dev
-        // (it showed garbage like -7737 mm); it is computed from the HD map below
-        // (ego → nearest centerline). v.locLaneDevMm is intentionally ignored.
+            kpiData.applyLocalizationStatus(v.locMode, v.locQuality, v.locLaneDevMm);
+        // The HD-map LANE-CENTER DEV stays computed below (ego → nearest centerline).
+        // The raw 0x10A Loc_Lane_Dev is ALSO surfaced separately as the RPi camera
+        // lane deviation (kpiData.piLaneDevMm) — a distinct measurement, shown alongside.
         if (v.behaviorDirty)
             kpiData.applyBehaviorState(v.behaviorMode);
         if (v.imuDirty)

@@ -45,10 +45,13 @@ KpiData::KpiData(QObject *parent) : QObject(parent) {
                                 m_lastEncRxTimer.elapsed() < m_encStaleMs;
         const bool egoFresh   = m_lastEgoRxTimer.isValid() &&
                                 m_lastEgoRxTimer.elapsed() < m_egoStaleMs;
+        const bool locFresh   = m_lastLocRxTimer.isValid() &&
+                                m_lastLocRxTimer.elapsed() < m_locStaleMs;
         m_lidarOk   = lidarFresh;
         m_imuOk     = imuFresh;
         m_encoderOk = encFresh;
         m_egoOk     = egoFresh;
+        m_piLaneOk  = locFresh;
         // Emit once per tick — bindings for ok/silentMs both refresh together.
         // 500 ms cadence is well below the human perception threshold and far
         // cheaper than re-eval at every CAN/IMU frame.

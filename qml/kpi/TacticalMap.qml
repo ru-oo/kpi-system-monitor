@@ -730,6 +730,21 @@ KpiPanel {
                     Text { id: ldu; text: "m"; color: theme.bodyMuted; font.pixelSize: 12 }
                 }
             }
+            Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: 32; color: theme.hairline }
+            // Raspberry-Pi camera lane deviation (0x10A Loc_Lane_Dev) — a distinct
+            // measurement from the HD-map LANE-CENTER DEV; "no data" when silent.
+            ColumnLayout {
+                spacing: 4
+                Text { text: "RPi LANE DEV"; color: theme.bodyDim; font.family: theme.defaultFont.family; font.weight: Font.DemiBold; font.pixelSize: 12 }
+                Row { spacing: 4
+                    Text { text: kpiData.piLaneOk ? (kpiData.piLaneDevMm / 1000).toFixed(2)
+                                                  : (kpiData.hasPiLaneDev ? "stale" : "no data")
+                           color: !kpiData.piLaneOk ? theme.bodyMuted
+                                : (Math.abs(kpiData.piLaneDevMm) > config.laneCenterDevMmMax ? theme.warning : theme.bodyText)
+                           font.family: theme.defaultFont.family; font.weight: Font.Bold; font.pixelSize: 20; anchors.baseline: rpu.baseline }
+                    Text { id: rpu; text: kpiData.piLaneOk ? "m" : ""; color: theme.bodyMuted; font.pixelSize: 12 }
+                }
+            }
             Item { Layout.fillWidth: true }
             Text {
                 text: kpiData.goalActive

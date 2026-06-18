@@ -1222,6 +1222,7 @@ void CanBridge::virtualTick20() {
     const double targetSpeed = (m_vDriveState == 2) ? 1.17 : 0.0;
     m_vSpeedMs = clampd(m_vSpeedMs + (targetSpeed - m_vSpeedMs) * 0.2 + rnd(-0.02, 0.02), 0, 2);
     m_vSteer   = clampd(m_vSteer * 0.85 + rnd(-3, 3), -25, 25);
+    m_vLaneDev = clampd(m_vLaneDev * 0.9 + rnd(-25, 25), -250, 250);   // demo RPi lane dev (mm)
     m_vDistM   = clampd(m_vDistM - 0.04 + rnd(-0.08, 0.08), 1.5, 12);
     if (m_vDistM < 2.0) m_vDistM = 11.5;
     m_vAng     = clampd(m_vAng + rnd(-0.6, 0.6), -45, 45);
@@ -1251,6 +1252,7 @@ void CanBridge::virtualTick20() {
 
     processFrame(QCanBusFrame(ID_OBSTACLE, buildObstacleFrame()));
     processFrame(QCanBusFrame(ID_VEHICLE,  buildVehicleStatusFrame()));
+    processFrame(QCanBusFrame(ID_LOCALIZATION, buildLocalizationFrame()));
     // Ego_Pose (map frame) — the recommended signal, synthesised here for demo.
     {
         QByteArray e(8, 0);
@@ -1406,6 +1408,16 @@ QByteArray CanBridge::buildVehicleStatusFrame() {
     putU8 (b, 5, encodeYoloMode(opt, model));
     putU8 (b, 6, 1);
     putU8 (b, 7, m_vCounter101++);
+    return b;
+}
+// 0x10A Localization_Status — demo RPi lane deviation (Loc_Lane_Dev, mm) + EKF/quality
+// placeholders + an advancing Loc_Counter so the UI sees a live RPi lane stream.
+QByteArray CanBridge::buildLocalizationFrame() {
+    QByteArray b(8, 0);
+    putU8 (b, 0, 1);                                                        // Loc_Mode = EKF
+    putU8 (b, 1, 80);                                                       // Loc_Quality 80%
+    putI16(b, 2, (qint16)qBound(-32768, (int)qRound(m_vLaneDev), 32767));   // Loc_Lane_Dev (mm)
+    putU8 (b, 7, m_vCounter10A++);                                          // Loc_Counter (alive)
     return b;
 }
 QByteArray CanBridge::buildRealtimeKpiFrame() {
