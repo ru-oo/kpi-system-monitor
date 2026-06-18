@@ -179,6 +179,9 @@ bool Config::loadFromFile(const QString &absolutePath) {
     m_mapFocusSpanM      = readD(tac, "map_focus_span_m",     m_mapFocusSpanM);
     m_datumLat          = readD(tac, "datum_lat", m_datumLat);
     m_datumLon          = readD(tac, "datum_lon", m_datumLon);
+    m_hasMapOffset      = tac.contains("map_offset_x") && tac.contains("map_offset_y");
+    m_mapOffsetX        = readD(tac, "map_offset_x", m_mapOffsetX);
+    m_mapOffsetY        = readD(tac, "map_offset_y", m_mapOffsetY);
     m_routeStartX       = readD(tac, "route_start_x",   m_routeStartX);
     m_routeStartY       = readD(tac, "route_start_y",   m_routeStartY);
     m_routeHeadingDeg   = readD(tac, "route_heading_deg", m_routeHeadingDeg);

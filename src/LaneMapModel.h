@@ -48,6 +48,11 @@ public:
     Q_INVOKABLE bool loadLanes(const QString &path);     // parse WGS84 geojson
     // Set the local-frame origin (from Map_Datum 0x108) and (re)compute ENU.
     Q_INVOKABLE void setDatum(double lat0, double lon0);
+    // Authoritative constant map→datum offset (common.yaml map_offset_xy). Once
+    // the system unifies map + ego on EPSG:5179 the offset is a pure constant the
+    // toEnu(origin,datum) estimate can't reproduce; when set, local-metre lanes
+    // use this instead.
+    Q_INVOKABLE void setMapOffset(double dx, double dy);
 
     // ENU geometry for QML painting: per feature { type, coords:[QPointF...] }.
     Q_INVOKABLE QVariantList featuresByCategory(const QString &category) const;
@@ -73,6 +78,8 @@ private:
     QString m_name, m_loadError;
     int     m_featureCount = 0;
     double  m_lat0 = 0, m_lon0 = 0;
+    bool    m_hasMapOffset = false;                  // use the constant offset below
+    double  m_mapOffsetX = 0, m_mapOffsetY = 0;      // authoritative common.yaml map_offset_xy
     double  m_minX = 0, m_minY = 0, m_maxX = 0, m_maxY = 0;   // ENU extent
     QHash<QString, QVector<Feature>> m_byCategory;
 };

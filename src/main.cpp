@@ -157,6 +157,10 @@ int main(int argc, char *argv[])
     // setReferenceDatum/applyMapDatum, which reject (0,0)/garbage datums).
     laneMap.setDatum(config.datumLat(), config.datumLon());
     kpiData.setReferenceDatum(config.datumLat(), config.datumLon());
+    // Authoritative constant map_offset (common.yaml). Overrides the toEnu estimate
+    // once the system unifies map + ego on EPSG:5179 (pure constant offset).
+    if (config.hasMapOffset())
+        laneMap.setMapOffset(config.mapOffsetX(), config.mapOffsetY());
 
     // ── Lane-center deviation from the HD map (replaces raw 0x10A) ──────
     // Signed lateral distance of the ego to the nearest HD centerline. The raw

@@ -169,6 +169,9 @@ public:
     QString campaign() const                 { return m_campaign; }
     double  datumLat() const                 { return m_datumLat; }
     double  datumLon() const                 { return m_datumLon; }
+    bool    hasMapOffset() const             { return m_hasMapOffset; }
+    double  mapOffsetX() const               { return m_mapOffsetX; }
+    double  mapOffsetY() const               { return m_mapOffsetY; }
     double  routeStartX() const              { return m_routeStartX; }
     double  routeStartY() const              { return m_routeStartY; }
     double  routeHeadingDeg() const          { return m_routeHeadingDeg; }
@@ -262,6 +265,8 @@ private:
     QString m_campaign = "dev";
     double  m_datumLat = 35.8341190;
     double  m_datumLon = 128.6862139;
+    bool    m_hasMapOffset = false;
+    double  m_mapOffsetX = 0.0, m_mapOffsetY = 0.0;
     double  m_routeStartX = 0.0;
     double  m_routeStartY = 0.0;
     double  m_routeHeadingDeg = 0.0;

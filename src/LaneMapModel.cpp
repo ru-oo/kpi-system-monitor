@@ -158,15 +158,27 @@ void LaneMapModel::setDatum(double lat0, double lon0) {
     emit laneChanged();
 }
 
+void LaneMapModel::setMapOffset(double dx, double dy) {
+    m_hasMapOffset = true; m_mapOffsetX = dx; m_mapOffsetY = dy;
+    recomputeEnu();
+    qInfo().nospace() << "[LaneMapModel] map_offset set (" << dx << "," << dy
+                      << ") → ENU extent x[" << m_minX << "," << m_maxX
+                      << "] y[" << m_minY << "," << m_maxY << "]";
+    emit laneChanged();
+}
+
 void LaneMapModel::recomputeEnu() {
     if (!m_loaded || !m_hasDatum) return;
-    // Local-metre re-base: the file's coords are offsets from ITS OWN WGS84
-    // origin, so shift them by that origin's ENU position in the current datum.
-    // Recomputed here, so a new datum (0x108) re-aligns the lanes dynamically.
-    // (Offset 0 when the origin is unknown — falls back to raw local coords.)
-    const QPointF localOff = (m_isLocalMetre && m_hasLocalOrigin)
-        ? toEnu(m_localOriginLat, m_localOriginLon, m_lat0, m_lon0)
-        : QPointF(0, 0);
+    // Local-metre re-base: shift the file's coords into the datum/ego frame.
+    // Prefer the authoritative constant map_offset (common.yaml map_offset_xy) when
+    // configured — once the system unifies map + ego on EPSG:5179 the offset is a
+    // pure constant, and the toEnu(origin,datum) estimate (ECEF) would be ~8 m off.
+    // Otherwise fall back to that estimate (or 0 when the origin is unknown).
+    QPointF localOff(0, 0);
+    if (m_isLocalMetre) {
+        if (m_hasMapOffset)        localOff = QPointF(m_mapOffsetX, m_mapOffsetY);
+        else if (m_hasLocalOrigin) localOff = toEnu(m_localOriginLat, m_localOriginLon, m_lat0, m_lon0);
+    }
     double mnX = std::numeric_limits<double>::max(), mnY = mnX;
     double mxX = std::numeric_limits<double>::lowest(), mxY = mxX;
     for (auto it = m_byCategory.begin(); it != m_byCategory.end(); ++it) {
