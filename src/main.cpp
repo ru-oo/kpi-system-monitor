@@ -334,10 +334,14 @@ int main(int argc, char *argv[])
         // The client records its OWN runs locally now (wired above), so the Runs
         // page lists THOSE (local disk scan) rather than mirroring the bridge's
         // run names. The bridge's own CSVs stay on the bridge machine.
-        // Raw CAN frames forwarded by the bridge → feed the Raw CAN Monitor (the
-        // client has no CAN of its own; this is the only path that fills it).
+        // Raw CAN frames forwarded by the bridge → feed the Raw CAN Monitor AND
+        // the local recorder, so a client-recorded run's CSV carries the raw
+        // frame rows (not just the per-run KPI means). The client has no CAN of
+        // its own; this forwarded stream is the only path that fills both.
         QObject::connect(stateLink, &StateLink::rawFrameReceived,
                          &rawFrames, &RawFrameModel::onFrame);
+        QObject::connect(stateLink, &StateLink::rawFrameReceived,
+                         &runRecorder, &RunRecorder::onFrame);
         // Bridge host = where the client sends commands/HELLO (the bridge
         // laptop's IP). KPI_BRIDGE_HOST overrides config.link.bridge_host so a
         // viewer laptop can be pointed at the bridge WITHOUT editing config.json

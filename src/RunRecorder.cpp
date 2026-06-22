@@ -139,6 +139,11 @@ void RunRecorder::startRun() {
     qInfo().noquote() << "[REC] recording →" << m_file.fileName();
     m_stream.setDevice(&m_file);
     m_stream << "# campaign," << m_campaign << "\n";
+    // Destination this run was driving to (the goal you set/clicked), so the run
+    // log records WHERE it was headed. Omitted when no goal is active.
+    if (m_kpi->goalActive())
+        m_stream << "# goal," << m_kpi->goalDistM() << ',' << m_kpi->goalLatM()
+                 << ',' << m_kpi->goalYawDeg() << "\n";
     m_stream << "# ts_ms,id,len,bytes_hex\n";
     m_runAcc.clear();
     m_sampleCount = 0;
