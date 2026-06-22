@@ -131,7 +131,7 @@ Item {
                                     Text { text: kpiData.optMode; color: theme.primaryOnDark; font.pixelSize: 11; font.family: theme.monoFont.family; font.weight: Font.DemiBold; anchors.verticalCenter: parent.verticalCenter }
                                 }
                             }
-                            Text { text: "vs PT FP32 baseline " + config.ptBaselineMs.toFixed(0) + " ms"; color: theme.bodyDim; font.pixelSize: 12 }
+                            Text { text: "vs FP32 baseline " + config.ptBaselineMs.toFixed(1) + " ms"; color: theme.bodyDim; font.pixelSize: 12 }
                             Item { Layout.fillWidth: true }
                             Text { text: config.realtimeKpiHz + "Hz · 0x102"; color: theme.bodyDim; font.pixelSize: 12; font.family: theme.monoFont.family }
                         }
@@ -168,7 +168,7 @@ Item {
                         }
                         RowLayout {
                             Layout.fillWidth: true
-                            Text { text: kpiData.optMode + " vs PyTorch FP32 (" + kpiData.yoloModel + " · " + config.ptBaselineMs.toFixed(0) + " ms)"; color: theme.bodyDim; font.pixelSize: 12 }
+                            Text { text: kpiData.optMode + " vs FP32 (" + kpiData.yoloModel + " · " + config.ptBaselineMs.toFixed(1) + " ms)"; color: theme.bodyDim; font.pixelSize: 12 }
                             Item { Layout.fillWidth: true }
                             Text { text: "live"; color: theme.bodyDim; font.pixelSize: 12; font.family: theme.monoFont.family }
                         }

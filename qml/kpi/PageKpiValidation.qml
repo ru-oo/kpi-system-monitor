@@ -583,7 +583,7 @@ Item {
                 CategoryCard {
                     title: "Safety / AI"; subtitle: "INT8 가속 · mAP@.5:.95 손실 · " + kpiData.yoloModel; pass: page.okSafety; hasData: page.hasSafety
                     property real int8Speed: config.ptBaselineMs / Math.max(kpiData.inferenceMs, 1)
-                    // mAP loss vs FP32 baseline, on the active model's map50-95 (0x101).
+                    // mAP loss vs FP32 baseline, on the active model's map50 (0x101).
                     property real int8Loss: kpiData.accFp32 > 0 ? ((kpiData.accFp32 - kpiData.accInt8) / kpiData.accFp32 * 100) : 0
                     property real fp16Loss: kpiData.accFp32 > 0 ? ((kpiData.accFp32 - kpiData.accFp16) / kpiData.accFp32 * 100) : 0
                     id: safetyCard

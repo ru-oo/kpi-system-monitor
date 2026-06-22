@@ -203,13 +203,13 @@ int main(int argc, char *argv[])
     // ── UI-thread initial state (runs before worker thread starts) ──────
     kpiData.setOptMode(config.defaultOptMode());
     kpiData.setYoloModel(config.defaultYoloModel());
-    // Accuracy is model-aware: load the active model's map50-95 triple, and
+    // Accuracy is model-aware: load the active model's map50 triple, and
     // re-apply whenever the selected Yolo_Mode model (0x101) changes so the
-    // Safety/AI card's mAP loss tracks YOLO26s ↔ YOLO26n.
+    // Safety/AI card's mAP loss tracks YOLO26s ↔ YOLO26n. (mAP50 basis.)
     auto applyModelAccuracy = [&config, &kpiData]() {
         const QString m = kpiData.yoloModel();
-        kpiData.applyAccuracy(config.accMap5095(m, 0), config.accMap5095(m, 1),
-                              config.accMap5095(m, 2));
+        kpiData.applyAccuracy(config.accMap50(m, 0), config.accMap50(m, 1),
+                              config.accMap50(m, 2));
     };
     applyModelAccuracy();
     QObject::connect(&kpiData, &KpiData::yoloModelChanged, &kpiData, applyModelAccuracy);

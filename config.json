@@ -16,7 +16,8 @@
   },
 
   "model": {
-    "pt_baseline_ms": 68,
+    "_pt_baseline_comment": "FP32 (TensorRT) inference baseline for the AI speed comparison — YOLO26s @640 = 13.71 ms. The live deployed-precision speedup is computed vs this (× = pt_baseline_ms / live 0x102 inference).",
+    "pt_baseline_ms": 13.71,
     "default_opt_mode": "INT8",
     "default_yolo_model": "YOLO26s",
     "perception_hz": 10,
