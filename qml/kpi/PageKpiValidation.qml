@@ -57,7 +57,11 @@ Item {
     readonly property bool okLoc:  hasLoc
                                    && Math.abs(kpiData.laneCenterDeviationMm) <= config.laneCenterDevMmMax
                                    && (kpiData.totalRuns === 0 || kpiData.successRuns >= config.localizationSuccessRunsMin)
+    // A measured plan time (>0) is required to PASS — a mid-AUTO attach latches
+    // hasPlan + a run count but leaves the time unmeasured ("—"), which must read
+    // WATCH (not a fabricated time PASS) until a real IDLE/STOP→AUTO plan is timed.
     readonly property bool okPlan: hasPlan
+                                   && kpiData.pathPlanLastMs > 0
                                    && kpiData.pathPlanLastMs <= config.pathPlanMsMax
                                    && kpiData.pathPlanSuccessRuns >= config.pathPlanSuccessRunsMin
     readonly property bool okCtrl: hasCtrl && kpiData.pathDeviationMm <= config.targetPathDeviationMm
@@ -86,7 +90,7 @@ Item {
     readonly property bool mLocRunsOk:   kpiData.successRuns >= config.localizationSuccessRunsMin
     readonly property bool mLocDevOk:    Math.abs(kpiData.laneCenterDeviationMm) <= config.laneCenterDevMmMax
     readonly property bool mPlanRunsOk:  kpiData.pathPlanSuccessRuns >= config.pathPlanSuccessRunsMin
-    readonly property bool mPlanTimeOk:  kpiData.pathPlanLastMs <= config.pathPlanMsMax
+    readonly property bool mPlanTimeOk:  kpiData.pathPlanLastMs > 0 && kpiData.pathPlanLastMs <= config.pathPlanMsMax
     readonly property bool mCtrlOk:      kpiData.pathDeviationMm <= config.targetPathDeviationMm
     readonly property bool mPercDetData: kpiData.perceptionTotalRuns > 0 || kpiData.totalRuns > 0
     readonly property int  mPercDetTotal: kpiData.perceptionTotalRuns > 0 ? kpiData.perceptionTotalRuns : config.runsTotal
@@ -430,7 +434,9 @@ Item {
                     ChartBox {
                         MetricBlock {
                             name: "이번 탐색 시간"
-                            valueText: kpiData.hasPathPlan ? ((kpiData.pathPlanLastMs/1000).toFixed(2) + " s") : "데이터 없음"
+                            // "—" when latched without a measured time (mid-AUTO attach) — never fabricate.
+                            valueText: !kpiData.hasPathPlan ? "데이터 없음"
+                                     : (kpiData.pathPlanLastMs > 0 ? ((kpiData.pathPlanLastMs/1000).toFixed(2) + " s") : "—")
                             valueColor: page.statusColor(kpiData.hasPathPlan, page.mPlanTimeOk)
                             AxisDot {
                                 value: kpiData.pathPlanLastMs; max: config.pathPlanChartMaxMs; targetMax: config.pathPlanMsMax

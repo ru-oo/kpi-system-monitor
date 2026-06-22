@@ -179,6 +179,18 @@ void KpiData::applyVehicleStatus(double speedKmh, double steeringDeg,
         m_hasPathPlan = true;
         emit pathPlanChanged();
     }
+    // Mid-AUTO attach (or AUTO entered without a witnessed IDLE/STOP planning
+    // window — e.g. a remote client connecting to an already-driving vehicle):
+    // the planning latency can't be measured, but the AUTO state still means a
+    // route WAS planned. Recognise it ONCE so the card leaves NO DATA — without
+    // inventing a time. m_pathPlanLastMs stays 0 (= "—"), and okPlan requires a
+    // measured time (>0) to PASS, so this reads WATCH until a real plan is timed.
+    if (isTransition && drivingStateName == "AUTO"
+        && !m_pathPlanInProgress && !m_hasPathPlan) {
+        ++m_pathPlanSuccessRuns; ++m_pathPlanTotalRuns;
+        m_hasPathPlan = true;
+        emit pathPlanChanged();
+    }
 
     m_prevDriveStateName = drivingStateName;
     recomputeBehavior();   // B2 (drive-state changed)
