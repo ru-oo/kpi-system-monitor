@@ -196,9 +196,12 @@ void KpiData::applyVehicleStatus(double speedKmh, double steeringDeg,
     recomputeBehavior();   // B2 (drive-state changed)
 
     bool modeChanged = false;
-    if (!optMode.isEmpty() && optMode != "OFF" && m_optMode != optMode) {
-        m_optMode = optMode; modeChanged = true;
-    }
+    // Precision (optMode = FP32/FP16/INT8) is UI-controlled and NOT distinctly
+    // echoed by the Jetson: its Yolo_Mode only carries the model/LiDAR mode
+    // (heavy/light → INT8), so applying the decoded opt here would clobber the
+    // user's FP16/FP32 pick on the very next 0x101. Keep the user's selection;
+    // only the model (YOLO26s/n) comes from CAN.
+    Q_UNUSED(optMode);
     if (!yoloModel.isEmpty() && yoloModel != "LiDAR" && m_yoloModel != yoloModel) {
         m_yoloModel = yoloModel; modeChanged = true;
     }
