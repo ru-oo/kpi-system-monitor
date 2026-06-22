@@ -106,21 +106,25 @@ int main(int argc, char *argv[])
     // Recording lives on the bridge/standalone side ONLY — the client (iPad)
     // records nothing locally (it has no raw frames and mirrors the bridge's run
     // list instead), so wire the recorder's inputs only when NOT a client.
+    // Run boundaries + arming are KpiData-driven, so they work in EVERY mode —
+    // including the client, which now records its OWN runs locally from the
+    // snapshots it receives (the CSV is written on the client). The raw-frame tap
+    // and replay-state stay bridge/standalone-only (the client has no local CAN).
+    // KPI cadence drives run boundaries (Driving_State) + sampling.
+    QObject::connect(&kpiData, &KpiData::kpiChanged,
+                     &runRecorder, &RunRecorder::onKpiTick);
+    // Setting a navigation goal arms auto-record (recorded on the AUTO drive).
+    QObject::connect(&kpiData, &KpiData::goalChanged,
+                     &runRecorder, &RunRecorder::onGoalSet);
     if (!clientMode) {
         // Raw RX frames (worker thread) → recorder + raw monitor (main): queued.
         QObject::connect(&canBridge, &CanBridge::frameForRecord,
                          &runRecorder, &RunRecorder::onFrame);
         QObject::connect(&canBridge, &CanBridge::frameForRecord,
                          &rawFrames, &RawFrameModel::onFrame);
-        // KPI cadence drives run boundaries (Driving_State) + sampling.
-        QObject::connect(&kpiData, &KpiData::kpiChanged,
-                         &runRecorder, &RunRecorder::onKpiTick);
         // Replay state (worker) → KpiData (main) so QML can bind it safely.
         QObject::connect(&canBridge, &CanBridge::replayingChanged,
                          &kpiData, &KpiData::setReplaying);
-        // Setting a navigation goal arms auto-record (recorded on the AUTO drive).
-        QObject::connect(&kpiData, &KpiData::goalChanged,
-                         &runRecorder, &RunRecorder::onGoalSet);
     }
 #endif
 
@@ -327,12 +331,9 @@ int main(int argc, char *argv[])
 #endif
     if (clientMode) {
         stateLink = new StateLink(StateLink::Role::Client, &app);
-        // Mirror the bridge's recorded-run list into the local recorder so the
-        // shared Runs page lists + replays them; the ▶ Replay button's
-        // canBridge.startReplay() is StateLink here → CMD_REPLAY to the bridge.
-        QObject::connect(stateLink, &StateLink::runListChanged, &runRecorder, [&]() {
-            runRecorder.setExternalRunList(stateLink->bridgeRunList());
-        });
+        // The client records its OWN runs locally now (wired above), so the Runs
+        // page lists THOSE (local disk scan) rather than mirroring the bridge's
+        // run names. The bridge's own CSVs stay on the bridge machine.
         // Raw CAN frames forwarded by the bridge → feed the Raw CAN Monitor (the
         // client has no CAN of its own; this is the only path that fills it).
         QObject::connect(stateLink, &StateLink::rawFrameReceived,
