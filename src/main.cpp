@@ -103,19 +103,20 @@ int main(int argc, char *argv[])
     DebugLink       debugLink;                         // Jetson /debug console (UDP)
 
 #ifndef Q_OS_IOS
-    // Recording lives on the bridge/standalone side ONLY — the client (iPad)
-    // records nothing locally (it has no raw frames and mirrors the bridge's run
-    // list instead), so wire the recorder's inputs only when NOT a client.
     // Run boundaries + arming are KpiData-driven, so they work in EVERY mode —
-    // including the client, which now records its OWN runs locally from the
-    // snapshots it receives (the CSV is written on the client). The raw-frame tap
-    // and replay-state stay bridge/standalone-only (the client has no local CAN).
-    // KPI cadence drives run boundaries (Driving_State) + sampling.
+    // including the client, which records + replays its OWN runs locally. KPI
+    // cadence drives run boundaries (Driving_State) + sampling; a goal arms
+    // auto-record. The raw-frame tap stays bridge/standalone-only (the client
+    // gets its frames from the bridge's forwarded stream, wired in the client
+    // block below).
     QObject::connect(&kpiData, &KpiData::kpiChanged,
                      &runRecorder, &RunRecorder::onKpiTick);
-    // Setting a navigation goal arms auto-record (recorded on the AUTO drive).
     QObject::connect(&kpiData, &KpiData::goalChanged,
                      &runRecorder, &RunRecorder::onGoalSet);
+    // Replay restores the run's recorded destination ("# goal" header) so the
+    // map shows where it was headed during playback.
+    QObject::connect(&canBridge, &CanBridge::replayGoalLoaded, &kpiData,
+                     [&kpiData](double d, double l, double y){ kpiData.setGoal(d, l, y); });
     if (!clientMode) {
         // Raw RX frames (worker thread) → recorder + raw monitor (main): queued.
         QObject::connect(&canBridge, &CanBridge::frameForRecord,
@@ -331,6 +332,10 @@ int main(int argc, char *argv[])
 #endif
     if (clientMode) {
         stateLink = new StateLink(StateLink::Role::Client, &app);
+        // Give the client's StateLink the local CanBridge so ▶ Replay plays the
+        // client's OWN recorded runs locally (decode + render here) instead of
+        // CMD_REPLAY to the bridge (which doesn't have the client's runs).
+        stateLink->attachBridge(&canBridge);
         // The client records its OWN runs locally now (wired above), so the Runs
         // page lists THOSE (local disk scan) rather than mirroring the bridge's
         // run names. The bridge's own CSVs stay on the bridge machine.
@@ -374,7 +379,10 @@ int main(int argc, char *argv[])
         // still see the dirty bits to ship to the client; if we TOOK here we'd
         // clear them out from under it and the iPad would freeze. Standalone /
         // client: TAKE (we're the only consumer; clearing dirty is correct).
-        const auto v = clientMode ? stateLink->takeLatest()
+        // During a local replay the client renders the decoded CSV from the local
+        // CanBridge (not the live UDP snapshot), so a client-recorded run plays
+        // back on the client. Otherwise: client = UDP, bridge = peek, standalone = take.
+        const auto v = (clientMode && !canBridge.isReplaying()) ? stateLink->takeLatest()
                      : (bridgeMode ? canBridge.peekLatest() : canBridge.takeLatest());
 #endif
         // Replay state rides the snapshot so the client knows the bridge is

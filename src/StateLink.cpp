@@ -290,10 +290,16 @@ void StateLink::sendSetGoalPose(double distM, double latM, double yawDeg) {
 }
 void StateLink::sendCancelGoal() { sendCommand(CMD_CANCEL_GOAL, {}); }
 void StateLink::startReplay(const QString &nameOrPath) {
-    // The CSV lives on the bridge — send just the run NAME (basename) and let the
-    // bridge resolve it in its own runs dir, then play it back.
+    // The client now records + lists its OWN runs locally, so replay them LOCALLY
+    // (decode through the attached CanBridge → rendered via the uiPoll replay
+    // path) rather than asking the bridge — the bridge doesn't have the client's
+    // runs. (m_can is attached in client mode too; see main.cpp.)
+    if (m_can) { m_can->startReplay(nameOrPath); return; }
     const QString name = QFileInfo(nameOrPath).fileName();
     QByteArray p; QDataStream s(&p, QIODevice::WriteOnly); setVer(s); s << name;
     sendCommand(CMD_REPLAY, p);
 }
-void StateLink::stopReplay() { sendCommand(CMD_STOP_REPLAY, {}); }
+void StateLink::stopReplay() {
+    if (m_can) { m_can->stopReplay(); return; }
+    sendCommand(CMD_STOP_REPLAY, {});
+}

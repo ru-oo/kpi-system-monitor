@@ -559,9 +559,16 @@ void CanBridge::startReplayImpl(const QString &path) {
         return;
     }
     m_replayRows.clear();
+    double rgX = 0, rgY = 0, rgYaw = 0; bool hasReplayGoal = false;
     QTextStream in(&f);
     while (!in.atEnd()) {
         const QString line = in.readLine().trimmed();
+        if (line.startsWith("# goal,")) {                           // the run's destination
+            const QStringList g = line.split(',');
+            if (g.size() >= 4) { rgX = g[1].toDouble(); rgY = g[2].toDouble();
+                                 rgYaw = g[3].toDouble(); hasReplayGoal = true; }
+            continue;
+        }
         if (line.isEmpty() || line.startsWith('#')) continue;       // header/comment
         const QStringList c = line.split(',');
         if (c.size() < 4) continue;
@@ -585,6 +592,7 @@ void CanBridge::startReplayImpl(const QString &path) {
     m_replaying = true;
     { QMutexLocker lock(&m_mutex); m_latest.replaying = true; }   // forwarded to client
     emit replayingChanged(true);
+    if (hasReplayGoal) emit replayGoalLoaded(rgX, rgY, rgYaw);   // restore the run's destination marker
     queueLog("REPLAY", QStringLiteral("Replaying %1 frames").arg(m_replayRows.size()), "info", "replay");
     m_replayClock.restart();
     m_replayTimer.start();

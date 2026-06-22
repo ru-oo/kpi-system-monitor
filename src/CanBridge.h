@@ -140,6 +140,9 @@ public:
 signals:
     void statusChanged();
     void replayingChanged(bool replaying);   // worker → main (KpiData.setReplaying)
+    // Destination recorded in the run being replayed ("# goal,distM,latM,yawDeg"
+    // header). worker → main → KpiData.setGoal so replay shows where it headed.
+    void replayGoalLoaded(double distM, double latM, double yawDeg);
     // Emitted (worker thread) for every decoded RX frame so a recorder can
     // persist the raw bytes. Suppressed during replay to avoid re-recording.
     void frameForRecord(quint32 id, const QByteArray &payload, qint64 tsMs);
