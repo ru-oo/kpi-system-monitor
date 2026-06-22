@@ -2,16 +2,16 @@
   "_comment": "Static project configuration. Loaded once at startup. Values that change at runtime live on CAN; values that come from offline benchmarks (YOLO mAP) or are operational targets/labels live here.",
 
   "accuracy": {
-    "_comment": "YOLO project benchmark per model & precision. map50 / map50_95 (%). The §4.2 mAP-loss KPI uses map50_95 (FP32 vs INT8). Active values follow the selected Yolo_Mode model (0x101). Update when retraining.",
+    "_comment": "YOLO26 @ 640px benchmark per model & precision. map50 / map50_95 (%). The §4.2 mAP-loss KPI uses map50_95 (FP32 vs INT8). Active values follow the selected Yolo_Mode model (0x101). Update when retraining.",
     "yolo26s": {
-      "fp32": { "map50": 62.33, "map50_95": 40.91 },
-      "fp16": { "map50": 62.35, "map50_95": 40.89 },
-      "int8": { "map50": 52.79, "map50_95": 30.04 }
+      "fp32": { "map50": 54.01, "map50_95": 35.69 },
+      "fp16": { "map50": 54.02, "map50_95": 35.67 },
+      "int8": { "map50": 45.99, "map50_95": 26.25 }
     },
     "yolo26n": {
-      "fp32": { "map50": 59.22, "map50_95": 37.64 },
-      "fp16": { "map50": 59.16, "map50_95": 37.57 },
-      "int8": { "map50": 52.73, "map50_95": 29.54 }
+      "fp32": { "map50": 51.18, "map50_95": 32.82 },
+      "fp16": { "map50": 51.13, "map50_95": 32.75 },
+      "int8": { "map50": 45.91, "map50_95": 25.87 }
     }
   },
 
@@ -22,8 +22,8 @@
     "perception_hz": 10,
     "realtime_kpi_hz": 10,
     "vehicle_status_hz": 50,
-    "_fp16_speedup_comment": "Reference FP16 speedup for the Safety/AI comparison chart (the deployed system runs INT8; the live INT8 speedup is computed from 0x102 inference latency).",
-    "fp16_speedup_ref": 2.2
+    "_fp16_speedup_comment": "Reference FP16 speedup for the Safety/AI comparison chart (YOLO26s @640: FP32 13.71 ms / FP16 6.71 ms ≈ 2.04×). The deployed system runs INT8; the live INT8 speedup is computed from 0x102 inference latency.",
+    "fp16_speedup_ref": 2.04
   },
 
   "targets": {

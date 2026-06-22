@@ -586,7 +586,7 @@ Item {
                             return ""   // 6: Debug
                         }
                         property string metaText: {
-                            if (index === 0) return (kpiData.inferenceMs > 0 ? (33.0 / kpiData.inferenceMs).toFixed(2) : "—") + "× vs FP32"
+                            if (index === 0) return (kpiData.inferenceMs > 0 ? (13.71 / kpiData.inferenceMs).toFixed(2) : "—") + "× vs FP32"   // YOLO26s @640 FP32 = 13.71 ms
                             if (index === 1) return kpiData.obstacleDistM.toFixed(1) + "m · L" + kpiData.failsafeLevel
                             if (index === 2) return "PASS · " + statusTabs.valWatch + " watch"
                             if (index === 3) return "CAN " + kpiData.busLoad.toFixed(0) + "% · Pi5 " + kpiData.frameLossPct.toFixed(1) + "%"
