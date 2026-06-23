@@ -2,9 +2,9 @@
   "_comment": "Static project configuration. Loaded once at startup. Values that change at runtime live on CAN; values that come from offline benchmarks (YOLO mAP) or are operational targets/labels live here.",
 
   "accuracy": {
-    "_comment": "YOLO26 @ 640px benchmark per model & precision. map50 / map50_95 (%). The §4.2 mAP-loss KPI uses map50_95 (FP32 vs INT8). Active values follow the selected Yolo_Mode model (0x101). Update when retraining.",
+    "_comment": "YOLO26 @ 640px benchmark per model & precision. map50 / map50_95 (%). yolo26s.fp32 = the PyTorch .pt baseline (53.96/36.19, 16.79 ms / 59.6 FPS) — the unoptimized reference; fp16/int8 are the TensorRT engines. yolo26n is the TensorRT benchmark (no .pt baseline supplied). The §4.2 mAP-loss KPI compares the active model's FP32 vs INT8. Active values follow the selected Yolo_Mode model (0x101). Update when retraining.",
     "yolo26s": {
-      "fp32": { "map50": 54.01, "map50_95": 35.69 },
+      "fp32": { "map50": 53.96, "map50_95": 36.19 },
       "fp16": { "map50": 54.02, "map50_95": 35.67 },
       "int8": { "map50": 45.99, "map50_95": 26.25 }
     },
@@ -16,8 +16,8 @@
   },
 
   "model": {
-    "_pt_baseline_comment": "FP32 (TensorRT) inference baseline for the AI speed comparison — YOLO26s @640 = 13.71 ms. The live deployed-precision speedup is computed vs this (× = pt_baseline_ms / live 0x102 inference).",
-    "pt_baseline_ms": 13.71,
+    "_pt_baseline_comment": "PyTorch FP32 (.pt) inference baseline for the AI speed comparison — YOLO26s @640 = 16.79 ms (59.6 FPS), the unoptimized reference model. The live deployed-precision (TensorRT) speedup is computed vs this (× = pt_baseline_ms / live 0x102 inference).",
+    "pt_baseline_ms": 16.79,
     "default_opt_mode": "INT8",
     "default_yolo_model": "YOLO26s",
     "perception_hz": 10,

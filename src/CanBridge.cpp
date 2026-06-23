@@ -1212,9 +1212,10 @@ void CanBridge::virtualTick20() {
         model = m_currentYoloModel;
     }
 
+    // Demo speedups vs the PyTorch FP32 baseline (TensorRT INT8≈3.4×, FP16≈2.5×, FP32≈1.22×).
     double optFloor = (opt == "INT8") ? m_ptBaselineMs / 3.4
-                    : (opt == "FP16") ? m_ptBaselineMs / 2.2
-                                      : m_ptBaselineMs / 1.0;
+                    : (opt == "FP16") ? m_ptBaselineMs / 2.5
+                                      : m_ptBaselineMs / 1.22;
     double modelMul = (model == "YOLO26n") ? 0.55 : 1.0;
     double baseInfer = optFloor * modelMul;
     double baseGpu = (opt == "INT8") ? 50.0 : (opt == "FP16") ? 62.0 : 78.0;
