@@ -562,7 +562,7 @@ Item {
                             if (index === 2) return statusTabs.valWatch > 0 ? 1 : 0
                             if (index === 3) return !kpiData.pi5Online ? 2 : ((kpiData.canTxLatencyMs > 10 || kpiData.frameLossPct > 0.1) ? 1 : 0)
                             if (index === 4) return kpiData.hasVehicle ? 0 : 1   // Tactical
-                            if (index === 5) return (kpiData.replaying || runRecorder.recording) ? 1 : 0   // Runs
+                            if (index === 5) return runRecorder.recording ? 1 : 0   // Runs (replay shown as normal — looks live)
                             return 0
                         }
                         property color statusColor: statusLevel === 2 ? theme.critical : (statusLevel === 1 ? theme.warning : theme.good)
@@ -572,7 +572,7 @@ Item {
                             if (index === 2) return statusTabs.valPass.toString()
                             if (index === 3) return statusLevel === 2 ? "LOST" : (statusLevel === 1 ? "DEGRADED" : "ONLINE")
                             if (index === 4) return kpiData.hasVehicle ? kpiData.progressM.toFixed(0) : "—"   // Tactical
-                            if (index === 5) return kpiData.replaying ? "REPLAY" : (runRecorder.recording ? "REC" : runRecorder.runCount.toString())   // Runs
+                            if (index === 5) return runRecorder.recording ? "REC" : runRecorder.runCount.toString()   // Runs (replay hidden)
                             return "—"
                         }
                         property string unitText: {
@@ -581,7 +581,7 @@ Item {
                             if (index === 2) return "/ " + statusTabs.valTotal
                             if (index === 3) return ""
                             if (index === 4) return "m"   // Tactical (along-route)
-                            if (index === 5) return (kpiData.replaying || runRecorder.recording) ? "" : "runs"   // Runs
+                            if (index === 5) return runRecorder.recording ? "" : "runs"   // Runs
                             return ""   // 6: Debug
                         }
                         property string metaText: {
@@ -590,7 +590,7 @@ Item {
                             if (index === 2) return "PASS · " + statusTabs.valWatch + " watch"
                             if (index === 3) return "CAN " + kpiData.busLoad.toFixed(0) + "% · Pi5 " + kpiData.frameLossPct.toFixed(1) + "%"
                             if (index === 4) return kpiData.goalActive ? ("goal " + kpiData.goalDistM.toFixed(0) + "m") : (kpiData.driveState ? kpiData.driveState : "idle")   // Tactical
-                            if (index === 5) return runRecorder.inRun ? (runRecorder.sampleCount + " samples") : (kpiData.replaying ? "playing back" : "record/replay")   // Runs
+                            if (index === 5) return runRecorder.inRun ? (runRecorder.sampleCount + " samples") : "record/replay"   // Runs
                             return ""
                         }
 
@@ -642,7 +642,7 @@ Item {
                                     color: stCard.statusLevel === 2 ? theme.critical : (stCard.statusLevel === 1 ? theme.warning : theme.bodyText)
                                     font.family: theme.defaultFont.family
                                     font.weight: Font.Bold
-                                    font.pixelSize: (stCard.index === 3 || (stCard.index === 5 && (kpiData.replaying || runRecorder.recording))) ? 22 : 28
+                                    font.pixelSize: (stCard.index === 3 || (stCard.index === 5 && runRecorder.recording)) ? 22 : 28
                                     Layout.alignment: Qt.AlignBottom
                                 }
                                 Text { visible: stCard.unitText.length > 0; text: stCard.unitText; color: theme.bodyMuted; font.family: theme.defaultFont.family; font.pixelSize: 13; Layout.alignment: Qt.AlignBottom; bottomPadding: 3 }
