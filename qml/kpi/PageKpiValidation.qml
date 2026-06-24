@@ -469,7 +469,7 @@ Item {
                         Canvas {
                             id: ctrlChart
                             Layout.fillWidth: true
-                            Layout.preferredHeight: 150
+                            Layout.preferredHeight: 110
                             property color line: kpiData.pathDeviationMm <= config.targetPathDeviationMm ? theme.good : theme.warning
                             onPaint: {
                                 var ctx = getContext("2d"); ctx.reset()
