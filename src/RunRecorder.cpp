@@ -63,9 +63,19 @@ double RunRecorder::kpiValue(const KpiSpec &s) const {
 }
 
 void RunRecorder::toggleRecording() {
-    m_armed = !m_armed;
-    if (!m_armed && m_inRun) finalizeRun();   // disarm mid-run → close it
-    emit stateChanged();
+    if (m_inRun || m_armed) {
+        // OFF — close an open run, or just disarm a goal-armed (not-yet-started) one.
+        if (m_inRun) finalizeRun();           // finalizeRun() clears m_armed + m_manual
+        else { m_armed = false; emit stateChanged(); }
+    } else {
+        // ON — MANUAL recording: open a run immediately and capture the live feed
+        // regardless of Driving_State, so a hand-driven (non-AUTO) demo is still
+        // recorded. A goal still auto-records the AUTO drive separately (onKpiTick).
+        if (m_kpi->replaying()) return;        // never record over a replay
+        m_manual = true;
+        m_armed  = true;
+        startRun();                            // opens the file, sets m_inRun, emits
+    }
 }
 
 // Arm auto-record when the operator sets a navigation goal. The actual run is
@@ -97,10 +107,10 @@ void RunRecorder::onKpiTick() {
         qInfo().noquote() << "[REC] AUTO entered — armed=" << m_armed
                           << "replaying=" << replaying << "inRun=" << m_inRun;
 
-    if (m_armed && !replaying && !m_inRun && cur == "AUTO")
+    if (m_armed && !m_manual && !replaying && !m_inRun && cur == "AUTO")
         startRun();
-    else if (m_inRun && (replaying || cur != "AUTO"))
-        finalizeRun();
+    else if (m_inRun && (replaying || (!m_manual && cur != "AUTO")))
+        finalizeRun();   // manual runs end only on toggle-off / replay, not on leaving AUTO
 
     if (m_inRun && !replaying) {
         for (const auto &s : std::as_const(m_specs)) {
@@ -164,8 +174,9 @@ void RunRecorder::finalizeRun() {
     }
     m_inRun = false;
     // One-shot per goal: a completed autonomous drive ends auto-record. The
-    // next goal re-arms it (onGoalSet).
+    // next goal re-arms it (onGoalSet). A manual run likewise fully resets.
     m_armed = false;
+    m_manual = false;
     refreshRuns();          // re-reads all runs (incl. this one) → rebuilds means
     emit stateChanged();
 }

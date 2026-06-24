@@ -85,7 +85,10 @@ private:
 
     bool    m_armed = false;    // auto-record arms when a goal is set (onGoalSet);
                                // then a run is captured on the AUTO drive. The
-                               // UI toggle can also flip it.
+                               // UI toggle starts a MANUAL run immediately instead.
+    bool    m_manual = false;   // true = manual REC toggle: capture the live feed
+                               // regardless of Driving_State (hand-driven demos),
+                               // and end only on toggle-off / replay, not AUTO exit.
     bool    m_external = false; // client: run list mirrored from the bridge (no
                                // local disk scan — see setExternalRunList).
     bool    m_inRun = false;

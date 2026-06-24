@@ -25,7 +25,7 @@ Item {
                 spacing: 14
 
                 Text { text: "Run Recorder"; color: theme.bodyText; font.family: theme.defaultFont.family; font.weight: Font.Bold; font.pixelSize: 18 }
-                Text { text: "auto-records each AUTO drive (goal → autonomous) → CSV · offline replay"; color: theme.bodyDim; font.family: theme.defaultFont.family; font.pixelSize: 13 }
+                Text { text: "REC records the live feed now (manual, any drive state) · a goal also auto-records the AUTO drive → CSV · offline replay"; color: theme.bodyDim; font.family: theme.defaultFont.family; font.pixelSize: 13 }
 
                 // Record / replay state row
                 RowLayout {
@@ -47,7 +47,7 @@ Item {
                                 anchors.verticalCenter: parent.verticalCenter
                             }
                             Text {
-                                text: parent.parent.on ? "AUTO-REC · ON" : "AUTO-REC · OFF"
+                                text: parent.parent.on ? "REC · ON" : "REC · OFF"
                                 color: parent.parent.on ? theme.good : theme.bodyMuted
                                 font.family: theme.defaultFont.family; font.weight: Font.Bold; font.pixelSize: 14
                                 anchors.verticalCenter: parent.verticalCenter
@@ -67,7 +67,7 @@ Item {
                                   ? ("● REC RUN · " + runRecorder.sampleCount + " samples")
                                   : (kpiData.replaying ? "▶ REPLAYING…"
                                      : (runRecorder.recording ? "armed · waiting for AUTO drive"
-                                        : "set a goal to arm auto-record"))
+                                        : "press REC to record now · or set a goal to auto-record"))
                             color: runRecorder.inRun ? theme.good : (kpiData.replaying ? theme.primaryOnDark : theme.bodyDim)
                             font.family: theme.defaultFont.family; font.weight: Font.DemiBold; font.pixelSize: 13
                         }
