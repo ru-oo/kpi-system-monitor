@@ -443,19 +443,6 @@ Item {
                                 loLabel: "0"; midLabel: "↑ target " + (config.pathPlanMsMax/1000).toFixed(1) + "s"; hiLabel: (config.pathPlanChartMaxMs/1000).toFixed(1) + "s"
                             }
                         }
-                        // 상태 라벨 (0x106 Planning_State enum) → 작은 칩 그대로
-                        RowLayout {
-                            Layout.fillWidth: true
-                            Text { text: "상태"; color: theme.bodyDim; font.family: theme.defaultFont.family; font.weight: Font.DemiBold; font.pixelSize: 12 }
-                            Item { Layout.fillWidth: true }
-                            Text {
-                                text: kpiData.hasPathPlan ? ["대기","계획중","성공","실패"][kpiData.planningState] : "데이터 없음"
-                                color: !kpiData.hasPathPlan ? theme.bodyMuted
-                                       : kpiData.planningState === 2 ? theme.good
-                                       : kpiData.planningState === 3 ? theme.warning : theme.bodyText
-                                font.family: theme.defaultFont.family; font.weight: Font.Bold; font.pixelSize: 13
-                            }
-                        }
                     }
                     Item { Layout.fillHeight: true }
                 }
