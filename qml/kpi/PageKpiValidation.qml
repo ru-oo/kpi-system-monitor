@@ -68,9 +68,8 @@ Item {
     readonly property bool okPerc: hasPerc
                                    && (kpiData.totalRuns === 0 || kpiData.perceptionDetectedRuns >= config.parkingDetectRunsMin)
                                    && (!kpiData.hasRealtimeKpi || kpiData.detectLatencyMs <= config.targetDetectLatencyMs)
-                                   && kpiData.falsePositiveCount < config.falsePositivePerRunMax * Math.max(kpiData.totalRuns, 1)
-                                   // §4.2 trigger accuracy now gates too (was display-only). No 0x107 yet → not failed.
-                                   && (kpiData.perceptionTotalRuns === 0 || kpiData.triggerAccuracyPct >= config.triggerAccuracyPctMin)
+                                   // YOLO detection confidence (0x100) replaces the old trigger-accuracy / false-positive gate.
+                                   && (!kpiData.hasObstacle || kpiData.obstacleConf >= config.perceptionConfidenceMin)
     readonly property bool okSafety: hasSafety
                                      && (config.ptBaselineMs / Math.max(kpiData.inferenceMs, 1)) >= config.targetSpeedupRatio
                                      && (!kpiData.hasAccuracy || ((kpiData.accFp32 - kpiData.accFp16) / Math.max(kpiData.accFp32, 1) * 100) <= config.targetMapLossPct)
@@ -525,7 +524,7 @@ Item {
 
                 // 4. PERCEPTION — detect rate (dots) + response (axis) + trigger (bigstat) + FP chip
                 CategoryCard {
-                    title: "Perception"; subtitle: "주차 감지율 · 응답 · 트리거"; pass: page.okPerc; hasData: page.hasPerc
+                    title: "Perception"; subtitle: "주차 감지율 · 응답 · YOLO conf"; pass: page.okPerc; hasData: page.hasPerc
                     ChartBox {
                         MetricBlock {
                             name: "주차 감지율"
@@ -550,30 +549,20 @@ Item {
                                 loLabel: "0"; midLabel: "↑ target " + config.targetDetectLatencyMs; hiLabel: (config.targetDetectLatencyMs*1.5).toFixed(0) + " ms"
                             }
                         }
-                        // 트리거 정확도(대표값) → BigStat · 오탐 → 작은 칩
+                        // YOLO 신뢰도(대표값) → BigStat (트리거 정확도/오탐 제거)
                         RowLayout {
                             Layout.fillWidth: true
                             ColumnLayout {
                                 spacing: 2
-                                Text { text: "트리거 정확도"; color: theme.bodyDim; font.family: theme.defaultFont.family; font.weight: Font.DemiBold; font.pixelSize: 12 }
+                                Text { text: "YOLO conf"; color: theme.bodyDim; font.family: theme.defaultFont.family; font.weight: Font.DemiBold; font.pixelSize: 12 }
                                 BigStat {
-                                    value: kpiData.perceptionTotalRuns > 0 ? kpiData.triggerAccuracyPct.toFixed(0) : "—"
+                                    value: kpiData.hasObstacle ? (kpiData.obstacleConf * 100).toFixed(0) : "—"
                                     unit: "%"; valueSize: 22
-                                    statusColor: page.statusColor(kpiData.perceptionTotalRuns > 0, kpiData.triggerAccuracyPct >= config.triggerAccuracyPctMin)
-                                    icon: page.statusIcon(kpiData.perceptionTotalRuns > 0, kpiData.triggerAccuracyPct >= config.triggerAccuracyPctMin)
+                                    statusColor: page.statusColor(kpiData.hasObstacle, kpiData.obstacleConf >= config.perceptionConfidenceMin)
+                                    icon: page.statusIcon(kpiData.hasObstacle, kpiData.obstacleConf >= config.perceptionConfidenceMin)
                                 }
                             }
                             Item { Layout.fillWidth: true }
-                            ColumnLayout {
-                                spacing: 2
-                                Text { text: "오탐"; color: theme.bodyDim; font.family: theme.defaultFont.family; font.weight: Font.DemiBold; font.pixelSize: 12; Layout.alignment: Qt.AlignRight }
-                                Text {
-                                    text: kpiData.falsePositiveCount + " 회"
-                                    color: kpiData.falsePositiveCount === 0 ? theme.good : theme.warning
-                                    font.family: theme.defaultFont.family; font.weight: Font.Bold; font.pixelSize: 18
-                                    Layout.alignment: Qt.AlignRight
-                                }
-                            }
                         }
                     }
                     Item { Layout.fillHeight: true }
