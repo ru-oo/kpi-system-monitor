@@ -516,22 +516,12 @@ Item {
             Layout.bottomMargin: 4
             Layout.preferredHeight: 104
 
-            // validation pass-count — same gated logic + config thresholds as
-            // PageKpiValidation (single source of truth; no hardcoded numbers).
-            readonly property bool valLoc:  kpiData.hasEgoPose
-                                            && Math.abs(kpiData.laneCenterDeviationMm) <= config.laneCenterDevMmMax
-                                            && (kpiData.totalRuns === 0 || kpiData.successRuns >= config.localizationSuccessRunsMin)
-            readonly property bool valPlan: kpiData.hasPathPlan
-                                            && kpiData.pathPlanSuccessRuns >= config.pathPlanSuccessRunsMin
-                                            && kpiData.pathPlanLastMs <= config.pathPlanMsMax
-            readonly property bool valCtrl: kpiData.hasRealtimeKpi && kpiData.pathDeviationMm <= config.targetPathDeviationMm
-            readonly property bool valPerc: (kpiData.perceptionTotalRuns > 0 || kpiData.totalRuns > 0)
-                                            && kpiData.perceptionDetectedRuns >= config.parkingDetectRunsMin
-                                            && (!kpiData.hasRealtimeKpi || kpiData.detectLatencyMs <= config.targetDetectLatencyMs)
-                                            && kpiData.falsePositiveCount < config.falsePositivePerRunMax * Math.max(kpiData.totalRuns, 1)
+            // validation pass-count — read straight from PageKpiValidation's own
+            // 3-state gating (single source of truth; no duplicated/stale logic).
+            // (The old per-category copy here omitted Safety + Monitoring → 4/6.)
             readonly property int  valTotal: 6
-            readonly property int  valPass: (valLoc?1:0) + (valPlan?1:0) + (valCtrl?1:0) + (valPerc?1:0)
-            readonly property int  valWatch: valTotal - valPass
+            readonly property int  valPass:  kpiVal.passCount
+            readonly property int  valWatch: kpiVal.watchCount
 
             RowLayout {
                 anchors.fill: parent
@@ -670,7 +660,7 @@ Item {
 
             PagePerformance { }
             PageVehicle { }
-            PageKpiValidation { }
+            PageKpiValidation { id: kpiVal }
             PageSystem { }
             PageTactical { }
             PageRuns { }
