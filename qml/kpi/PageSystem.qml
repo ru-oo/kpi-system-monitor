@@ -67,17 +67,6 @@ Item {
                         Text { text: "Raw CAN Monitor"; color: theme.bodyText; font.family: theme.defaultFont.family; font.weight: Font.Bold; font.pixelSize: 16 }
                         Text { text: "bus-level · last " + rawFrames.frames.length + " frames"; color: theme.bodyDim; font.family: theme.defaultFont.family; font.pixelSize: 12 }
                         Item { Layout.fillWidth: true }
-                        // B1 — localization quality pill (EKF, post-AMCL; from 0x10A)
-                        Rectangle {
-                            implicitWidth: locR.implicitWidth + 18; implicitHeight: 24; radius: 12
-                            property color lc: kpiData.localizationQuality >= 0.7 ? theme.good
-                                             : kpiData.localizationQuality >= 0.4 ? theme.warning : theme.critical
-                            color: Qt.rgba(lc.r, lc.g, lc.b, 0.12); border.color: lc
-                            Row { id: locR; anchors.centerIn: parent; spacing: 6
-                                Rectangle { width: 7; height: 7; radius: 3.5; color: parent.parent.lc; anchors.verticalCenter: parent.verticalCenter }
-                                Text { text: "LOC " + kpiData.localizationMode + " " + (kpiData.localizationQuality*100).toFixed(0) + "%"; color: parent.parent.lc; font.family: theme.defaultFont.family; font.weight: Font.DemiBold; font.pixelSize: 11; anchors.verticalCenter: parent.verticalCenter }
-                            }
-                        }
                         // 0x10D Ego_Pose reception: live / stale (frozen) / none.
                         Rectangle {
                             implicitWidth: egoR.implicitWidth + 18; implicitHeight: 24; radius: 12

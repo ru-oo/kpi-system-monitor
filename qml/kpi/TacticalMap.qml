@@ -116,24 +116,6 @@ KpiPanel {
             }
             Item { Layout.fillWidth: true }
 
-            // B1 — localization source/confidence pill (derived until 0x108)
-            Rectangle {
-                Layout.alignment: Qt.AlignVCenter
-                implicitWidth: locRow.implicitWidth + 20; implicitHeight: 26; radius: 13
-                // EKF localization quality (post-AMCL): colour by Loc_Quality.
-                property color locColor: kpiData.localizationQuality >= 0.7 ? theme.good
-                                       : kpiData.localizationQuality >= 0.4 ? theme.warning : theme.critical
-                color: Qt.rgba(locColor.r, locColor.g, locColor.b, 0.12)
-                border.color: locColor
-                Row {
-                    id: locRow; anchors.centerIn: parent; spacing: 6
-                    Rectangle { width: 8; height: 8; radius: 4; color: parent.parent.locColor; anchors.verticalCenter: parent.verticalCenter
-                        SequentialAnimation on opacity { running: kpiData.localizationQuality < 0.4; loops: Animation.Infinite; NumberAnimation { to: 0.35; duration: 700 } NumberAnimation { to: 1.0; duration: 700 } } }
-                    Text { text: "LOC " + kpiData.localizationMode; color: parent.parent.locColor; font.family: theme.defaultFont.family; font.weight: Font.Bold; font.pixelSize: 12; anchors.verticalCenter: parent.verticalCenter }
-                    Text { text: (kpiData.localizationQuality * 100).toFixed(0) + "%"; color: theme.bodyMuted; font.family: theme.monoFont.family; font.pixelSize: 11; anchors.verticalCenter: parent.verticalCenter }
-                }
-            }
-
             // B2 — behavior FSM pill (derived until 0x109)
             Rectangle {
                 Layout.alignment: Qt.AlignVCenter
@@ -685,29 +667,10 @@ KpiPanel {
 
         Rectangle { Layout.fillWidth: true; Layout.preferredHeight: 1; color: theme.hairline }
 
-        // ── Mission + Path Deviation + goal readout (carried over) ──
+        // ── Path Deviation + lane dev + goal readout ──
         RowLayout {
             Layout.fillWidth: true
             spacing: 16
-            ColumnLayout {
-                spacing: 6; Layout.preferredWidth: 300
-                RowLayout {
-                    Layout.fillWidth: true; spacing: 8
-                    Text { text: "MISSION"; color: theme.bodyDim; font.family: theme.defaultFont.family; font.weight: Font.DemiBold; font.pixelSize: 12 }
-                    Text { text: kpiData.hasMission ? kpiData.missionSuccess : "—"; color: theme.bodyText; font.family: theme.defaultFont.family; font.weight: Font.Bold; font.pixelSize: 20 }
-                    Text { text: kpiData.hasMission ? ("/ " + kpiData.missionTotal) : ""; color: theme.bodyMuted; font.pixelSize: 13; Layout.alignment: Qt.AlignBottom; bottomPadding: 2 }
-                    Item { Layout.fillWidth: true }
-                }
-                RowLayout {
-                    Layout.fillWidth: true; spacing: 4
-                    Repeater {
-                        model: kpiData.hasMission ? kpiData.missionTotal : 10
-                        delegate: Rectangle { Layout.fillWidth: true; Layout.preferredHeight: 8; radius: 4
-                            color: kpiData.hasMission && index < kpiData.missionSuccess ? theme.good : (theme.lightMode ? Qt.rgba(0,0,0,0.10) : Qt.rgba(1,1,1,0.08)) }
-                    }
-                }
-            }
-            Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: 32; color: theme.hairline }
             ColumnLayout {
                 spacing: 4
                 Text { text: "PATH DEVIATION"; color: theme.bodyDim; font.family: theme.defaultFont.family; font.weight: Font.DemiBold; font.pixelSize: 12 }
