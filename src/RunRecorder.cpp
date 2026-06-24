@@ -95,6 +95,7 @@ void RunRecorder::onGoalSet() {
 
 // ── Frame stream (queued from worker) — persist raw bytes while in a run ──
 void RunRecorder::onFrame(quint32 id, const QByteArray &payload, qint64 tsMs) {
+    if (m_kpi->replaying()) return;            // don't re-record frames we're replaying
     if (!m_inRun || !m_file.isOpen()) return;
     m_stream << tsMs << ',' << "0x" << QString::number(id, 16).toUpper()
              << ',' << payload.size() << ',' << QString::fromLatin1(payload.toHex()) << '\n';

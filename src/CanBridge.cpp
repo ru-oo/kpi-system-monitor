@@ -650,10 +650,11 @@ void CanBridge::processFrame(const QCanBusFrame &f) {
     if (!f.isValid()) return;
     ++m_rxFrames;
     const QByteArray p = f.payload();
-    // Tap the raw frame for the recorder (skip while replaying so we don't
-    // re-record what we're playing back). Queued to the RunRecorder on main.
-    if (!m_replaying)
-        emit frameForRecord(f.frameId(), p, QDateTime::currentMSecsSinceEpoch());
+    // Tap the raw frame for the recorder + Raw CAN Monitor. Emitted during
+    // replay too, so the monitor follows playback; the recorder itself skips
+    // replay (RunRecorder::onFrame guards on replaying()), so we don't
+    // re-record what we're playing back.
+    emit frameForRecord(f.frameId(), p, QDateTime::currentMSecsSinceEpoch());
     switch (f.frameId()) {
         case ID_ENCODER:      decodeStm32Encoder(p);    break;
         case ID_IMU:          decodeStm32Imu(p);        break;
