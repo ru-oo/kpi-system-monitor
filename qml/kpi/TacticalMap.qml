@@ -607,25 +607,43 @@ KpiPanel {
             }
         }
 
-        // ── presets (per-map) + confirm bar ──
+        // ── deviations (path / lane-center / RPi) + goal confirm bar ──
         RowLayout {
             Layout.fillWidth: true
             spacing: 8
 
-            Text { text: "PRESETS"; color: theme.bodyDim; font.family: theme.defaultFont.family; font.weight: Font.DemiBold; font.pixelSize: 11; font.letterSpacing: 0.5 }
-            Repeater {
-                model: mapModel.presets
-                delegate: Rectangle {
-                    required property var modelData
-                    Layout.preferredHeight: 34
-                    implicitWidth: presetTxt.implicitWidth + 22
-                    radius: 9
-                    color: presetMA.pressed ? Qt.rgba(48/255,209/255,88/255,0.22) : Qt.rgba(48/255,209/255,88/255,0.10)
-                    border.color: theme.hairlineStrong
-                    opacity: panel.goalUnlocked ? 1.0 : 0.4
-                    Text { id: presetTxt; anchors.centerIn: parent; text: "⚑ " + modelData.name; color: theme.good; font.family: theme.defaultFont.family; font.weight: Font.DemiBold; font.pixelSize: 12 }
-                    MouseArea { id: presetMA; anchors.fill: parent; enabled: panel.goalUnlocked; cursorShape: Qt.PointingHandCursor
-                        onClicked: panel.sendGoal(modelData.x, modelData.y, modelData.yaw) }
+            // deviations (moved here from the row below — presets removed)
+            ColumnLayout {
+                spacing: 4
+                Text { text: "PATH DEVIATION"; color: theme.bodyDim; font.family: theme.defaultFont.family; font.weight: Font.DemiBold; font.pixelSize: 12 }
+                Row { spacing: 4
+                    Text { text: kpiData.hasRealtimeKpi ? (kpiData.pathDeviationMm / 1000).toFixed(2) : "—"; color: kpiData.pathDeviationMm > config.targetPathDeviationMm ? theme.warning : theme.bodyText; font.family: theme.defaultFont.family; font.weight: Font.Bold; font.pixelSize: 20; anchors.baseline: pdu.baseline }
+                    Text { id: pdu; text: "m · < " + (config.targetPathDeviationMm / 1000).toFixed(2); color: theme.bodyMuted; font.pixelSize: 12 }
+                }
+            }
+            Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: 32; color: theme.hairline }
+            ColumnLayout {
+                spacing: 4
+                Row { spacing: 5
+                    Text { text: "LANE-CENTER DEV"; color: theme.bodyDim; font.family: theme.defaultFont.family; font.weight: Font.DemiBold; font.pixelSize: 12 }
+                    Text { text: "(~)"; color: theme.bodyDim; font.family: theme.monoFont.family; font.pixelSize: 10 }
+                }
+                Row { spacing: 4
+                    Text { text: kpiData.hasEgoPose ? (kpiData.laneCenterDeviationMm / 1000).toFixed(2) : "—"; color: !kpiData.hasEgoPose ? theme.bodyMuted : (Math.abs(kpiData.laneCenterDeviationMm) > config.laneCenterDevMmMax ? theme.warning : theme.bodyText); font.family: theme.defaultFont.family; font.weight: Font.Bold; font.pixelSize: 20; anchors.baseline: ldu.baseline }
+                    Text { id: ldu; text: "m"; color: theme.bodyMuted; font.pixelSize: 12 }
+                }
+            }
+            Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: 32; color: theme.hairline }
+            ColumnLayout {
+                spacing: 4
+                Text { text: "RPi LANE DEV"; color: theme.bodyDim; font.family: theme.defaultFont.family; font.weight: Font.DemiBold; font.pixelSize: 12 }
+                Row { spacing: 4
+                    Text { text: kpiData.piLaneOk ? (kpiData.piLaneDevMm / 1000).toFixed(2)
+                                                  : (kpiData.hasPiLaneDev ? "stale" : "no data")
+                           color: !kpiData.piLaneOk ? theme.bodyMuted
+                                : (Math.abs(kpiData.piLaneDevMm) > config.laneCenterDevMmMax ? theme.warning : theme.bodyText)
+                           font.family: theme.defaultFont.family; font.weight: Font.Bold; font.pixelSize: 20; anchors.baseline: rpu.baseline }
+                    Text { id: rpu; text: kpiData.piLaneOk ? "m" : ""; color: theme.bodyMuted; font.pixelSize: 12 }
                 }
             }
 
@@ -667,47 +685,10 @@ KpiPanel {
 
         Rectangle { Layout.fillWidth: true; Layout.preferredHeight: 1; color: theme.hairline }
 
-        // ── Path Deviation + lane dev + goal readout ──
+        // ── goal readout ──
         RowLayout {
             Layout.fillWidth: true
             spacing: 16
-            ColumnLayout {
-                spacing: 4
-                Text { text: "PATH DEVIATION"; color: theme.bodyDim; font.family: theme.defaultFont.family; font.weight: Font.DemiBold; font.pixelSize: 12 }
-                Row { spacing: 4
-                    Text { text: kpiData.hasRealtimeKpi ? (kpiData.pathDeviationMm / 1000).toFixed(2) : "—"; color: kpiData.pathDeviationMm > config.targetPathDeviationMm ? theme.warning : theme.bodyText; font.family: theme.defaultFont.family; font.weight: Font.Bold; font.pixelSize: 20; anchors.baseline: pdu.baseline }
-                    Text { id: pdu; text: "m · < " + (config.targetPathDeviationMm / 1000).toFixed(2); color: theme.bodyMuted; font.pixelSize: 12 }
-                }
-            }
-            Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: 32; color: theme.hairline }
-            // B3 — lane-center deviation (vision); placeholder until real signal
-            ColumnLayout {
-                spacing: 4
-                Row { spacing: 5
-                    Text { text: "LANE-CENTER DEV"; color: theme.bodyDim; font.family: theme.defaultFont.family; font.weight: Font.DemiBold; font.pixelSize: 12 }
-                    // "~" = derived (computed from the HD map, not a raw CAN signal yet)
-                    Text { text: "(~)"; color: theme.bodyDim; font.family: theme.monoFont.family; font.pixelSize: 10 }
-                }
-                Row { spacing: 4
-                    Text { text: kpiData.hasEgoPose ? (kpiData.laneCenterDeviationMm / 1000).toFixed(2) : "—"; color: !kpiData.hasEgoPose ? theme.bodyMuted : (Math.abs(kpiData.laneCenterDeviationMm) > config.laneCenterDevMmMax ? theme.warning : theme.bodyText); font.family: theme.defaultFont.family; font.weight: Font.Bold; font.pixelSize: 20; anchors.baseline: ldu.baseline }
-                    Text { id: ldu; text: "m"; color: theme.bodyMuted; font.pixelSize: 12 }
-                }
-            }
-            Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: 32; color: theme.hairline }
-            // Raspberry-Pi camera lane deviation (0x10A Loc_Lane_Dev) — a distinct
-            // measurement from the HD-map LANE-CENTER DEV; "no data" when silent.
-            ColumnLayout {
-                spacing: 4
-                Text { text: "RPi LANE DEV"; color: theme.bodyDim; font.family: theme.defaultFont.family; font.weight: Font.DemiBold; font.pixelSize: 12 }
-                Row { spacing: 4
-                    Text { text: kpiData.piLaneOk ? (kpiData.piLaneDevMm / 1000).toFixed(2)
-                                                  : (kpiData.hasPiLaneDev ? "stale" : "no data")
-                           color: !kpiData.piLaneOk ? theme.bodyMuted
-                                : (Math.abs(kpiData.piLaneDevMm) > config.laneCenterDevMmMax ? theme.warning : theme.bodyText)
-                           font.family: theme.defaultFont.family; font.weight: Font.Bold; font.pixelSize: 20; anchors.baseline: rpu.baseline }
-                    Text { id: rpu; text: kpiData.piLaneOk ? "m" : ""; color: theme.bodyMuted; font.pixelSize: 12 }
-                }
-            }
             Item { Layout.fillWidth: true }
             Text {
                 text: kpiData.goalActive
