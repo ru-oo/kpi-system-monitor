@@ -90,6 +90,16 @@ KpiPanel {
                     { id: "0x103", name: "system",    seen: kpiData.hasMemory,        tx: false },
                     { id: "0x104", name: "route",     seen: kpiData.hasMission,       tx: false },
                     { id: "0x105", name: "hardware",  seen: kpiData.hasHardware,      tx: false },
+                    { id: "0x106", name: "planning",  seen: kpiData.hasPathPlan,            tx: false },
+                    { id: "0x107", name: "perception",seen: kpiData.perceptionTotalRuns > 0,tx: false },
+                    { id: "0x108", name: "datum",     seen: kpiData.hasDatum,               tx: false },
+                    { id: "0x109", name: "network",   seen: kpiData.hasNetwork,             tx: false },
+                    { id: "0x10A", name: "loc",       seen: kpiData.hasLocalization,        tx: false },
+                    { id: "0x10B", name: "behavior",  seen: kpiData.behaviorFromCan,        tx: false },
+                    { id: "0x10C", name: "map-info",  seen: kpiData.hasMapInfo,             tx: false },
+                    { id: "0x10D", name: "ego-pose",  seen: kpiData.hasEgoPose,             tx: false },
+                    { id: "0x20",  name: "encoder",   seen: kpiData.hasEncoder,             tx: false },
+                    { id: "0x21",  name: "imu",       seen: kpiData.hasImu,                 tx: false },
                     { id: "0x1FF", name: "failsafe",  seen: kpiData.hasFailsafeEvent, tx: false },
                     { id: "0x200", name: "ui-cmd",    seen: kpiData.framesTx > 0,     tx: true }
                 ]
