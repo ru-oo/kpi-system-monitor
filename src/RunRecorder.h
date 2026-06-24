@@ -89,6 +89,9 @@ private:
     bool    m_manual = false;   // true = manual REC toggle: capture the live feed
                                // regardless of Driving_State (hand-driven demos),
                                // and end only on toggle-off / replay, not AUTO exit.
+    bool    m_goalWritten = false; // a "# goal" line has been written this run (at
+                               // startRun if a goal was already set, else the first
+                               // onGoalSet during the run) → replay shows the dest.
     bool    m_external = false; // client: run list mirrored from the bridge (no
                                // local disk scan — see setExternalRunList).
     bool    m_inRun = false;

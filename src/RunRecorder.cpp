@@ -81,6 +81,15 @@ void RunRecorder::toggleRecording() {
 // Arm auto-record when the operator sets a navigation goal. The actual run is
 // captured on the subsequent AUTO drive (and never while replaying).
 void RunRecorder::onGoalSet() {
+    // A manual REC run usually starts BEFORE the operator clicks a destination,
+    // so the "# goal" header isn't written at startRun(). Capture it now — the
+    // replay scans the whole file for "# goal", so a mid-stream line still
+    // restores the destination marker on playback.
+    if (m_inRun && m_file.isOpen() && !m_goalWritten && m_kpi->goalActive()) {
+        m_stream << "# goal," << m_kpi->goalDistM() << ',' << m_kpi->goalLatM()
+                 << ',' << m_kpi->goalYawDeg() << "\n";
+        m_goalWritten = true;
+    }
     if (!m_armed) { m_armed = true; emit stateChanged(); }
 }
 
@@ -151,9 +160,12 @@ void RunRecorder::startRun() {
     m_stream << "# campaign," << m_campaign << "\n";
     // Destination this run was driving to (the goal you set/clicked), so the run
     // log records WHERE it was headed. Omitted when no goal is active.
-    if (m_kpi->goalActive())
+    m_goalWritten = false;
+    if (m_kpi->goalActive()) {
         m_stream << "# goal," << m_kpi->goalDistM() << ',' << m_kpi->goalLatM()
                  << ',' << m_kpi->goalYawDeg() << "\n";
+        m_goalWritten = true;
+    }
     m_stream << "# ts_ms,id,len,bytes_hex\n";
     m_runAcc.clear();
     m_sampleCount = 0;
