@@ -20,7 +20,7 @@ Item {
     id: root
 
     // Category pages
-    readonly property var tabLabels: ["AI Inference", "Driving & Perception", "KPI Validation", "System & Events", "Tactical", "Runs", "Debug"]
+    readonly property var tabLabels: ["AI Inference", "Driving & Perception", "KPI Validation", "System & Events", "Tactical", "Runs"]
 
     // E-STOP latch. Once engaged it STAYS engaged (the worker keeps re-asserting
     // Estop_Command=1 so the vehicle holds the stop) until a deliberate
@@ -544,8 +544,7 @@ Item {
                         { num: "03", label: "KPI Validation" },
                         { num: "04", label: "System" },
                         { num: "05", label: "Tactical" },
-                        { num: "06", label: "Runs" },
-                        { num: "07", label: "Debug" }
+                        { num: "06", label: "Runs" }
                     ]
                     delegate: Rectangle {
                         id: stCard
@@ -564,7 +563,7 @@ Item {
                             if (index === 3) return !kpiData.pi5Online ? 2 : ((kpiData.canTxLatencyMs > 10 || kpiData.frameLossPct > 0.1) ? 1 : 0)
                             if (index === 4) return kpiData.hasVehicle ? 0 : 1   // Tactical
                             if (index === 5) return (kpiData.replaying || runRecorder.recording) ? 1 : 0   // Runs
-                            return debugLink.linkUp ? 0 : 1   // 6: Debug (warn until a debug stream arrives)
+                            return 0
                         }
                         property color statusColor: statusLevel === 2 ? theme.critical : (statusLevel === 1 ? theme.warning : theme.good)
                         property string primaryText: {
@@ -574,7 +573,7 @@ Item {
                             if (index === 3) return statusLevel === 2 ? "LOST" : (statusLevel === 1 ? "DEGRADED" : "ONLINE")
                             if (index === 4) return kpiData.hasVehicle ? kpiData.progressM.toFixed(0) : "—"   // Tactical
                             if (index === 5) return kpiData.replaying ? "REPLAY" : (runRecorder.recording ? "REC" : runRecorder.runCount.toString())   // Runs
-                            return debugLink.linkUp ? "LIVE" : "—"   // 6: Debug
+                            return "—"
                         }
                         property string unitText: {
                             if (index === 0) return "ms"
@@ -592,7 +591,7 @@ Item {
                             if (index === 3) return "CAN " + kpiData.busLoad.toFixed(0) + "% · Pi5 " + kpiData.frameLossPct.toFixed(1) + "%"
                             if (index === 4) return kpiData.goalActive ? ("goal " + kpiData.goalDistM.toFixed(0) + "m") : (kpiData.driveState ? kpiData.driveState : "idle")   // Tactical
                             if (index === 5) return runRecorder.inRun ? (runRecorder.sampleCount + " samples") : (kpiData.replaying ? "playing back" : "record/replay")   // Runs
-                            return debugLink.messageCount + " msgs"   // 6: Debug
+                            return ""
                         }
 
                         color: current ? theme.tile2 : theme.tile2Dim
@@ -675,7 +674,6 @@ Item {
             PageSystem { }
             PageTactical { }
             PageRuns { }
-            PageDebug { }
         }
 
         // ─────────────────────── PAGE INDICATOR ───────────────────────
