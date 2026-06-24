@@ -166,7 +166,11 @@ void KpiData::applyVehicleStatus(double speedKmh, double steeringDeg,
     }
     // Transition into AUTO while planning was in progress = success.
     if (isTransition && drivingStateName == "AUTO" && m_pathPlanInProgress) {
-        m_pathPlanLastMs = m_pathPlanTimer.elapsed();
+        const qint64 dwell = m_pathPlanTimer.elapsed();
+        // Cap: a dwell over 10 s is a manual IDLE/STOP wait (operator setup, a
+        // pause between runs) rather than planning latency — keep the last real
+        // plan time instead of recording the inflated value (was showing ~120 s).
+        if (dwell <= 10000) m_pathPlanLastMs = dwell;
         ++m_pathPlanSuccessRuns; ++m_pathPlanTotalRuns;
         m_pathPlanInProgress = false;
         m_hasPathPlan = true;
