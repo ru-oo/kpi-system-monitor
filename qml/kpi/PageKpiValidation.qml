@@ -73,7 +73,7 @@ Item {
                                    && (kpiData.perceptionTotalRuns === 0 || kpiData.triggerAccuracyPct >= config.triggerAccuracyPctMin)
     readonly property bool okSafety: hasSafety
                                      && (config.ptBaselineMs / Math.max(kpiData.inferenceMs, 1)) >= config.targetSpeedupRatio
-                                     && (!kpiData.hasAccuracy || ((kpiData.accFp32 - kpiData.accInt8) / Math.max(kpiData.accFp32, 1) * 100) <= config.targetMapLossPct)
+                                     && (!kpiData.hasAccuracy || ((kpiData.accFp32 - kpiData.accFp16) / Math.max(kpiData.accFp32, 1) * 100) <= config.targetMapLossPct)
     readonly property bool okMon: hasMon
                                   && kpiData.canTxLatencyMs <= config.targetCanTxLatencyMs
                                   && (!kpiData.hasMemory || kpiData.frameLossPct <= config.canLossPctMax)
@@ -99,7 +99,7 @@ Item {
     readonly property bool mPercTrigData: kpiData.perceptionTotalRuns > 0
     readonly property bool mPercTrigOk:  kpiData.triggerAccuracyPct >= config.triggerAccuracyPctMin
     readonly property real mInt8Speed:   config.ptBaselineMs / Math.max(kpiData.inferenceMs, 1)
-    readonly property real mInt8Loss:    kpiData.accFp32 > 0 ? ((kpiData.accFp32 - kpiData.accInt8) / kpiData.accFp32 * 100) : 0
+    readonly property real mInt8Loss:    kpiData.accFp32 > 0 ? ((kpiData.accFp32 - kpiData.accFp16) / kpiData.accFp32 * 100) : 0   // now FP16 (per Safety card)
     readonly property bool mSafeSpdOk:   mInt8Speed >= config.targetSpeedupRatio
     readonly property bool mSafeLossOk:  mInt8Loss <= config.targetMapLossPct
     readonly property bool mMonLossOk:   kpiData.frameLossPct <= config.canLossPctMax
@@ -581,16 +581,16 @@ Item {
 
                 // 5. SAFETY / AI — grouped speed/loss bars + 2 metrics
                 CategoryCard {
-                    title: "Safety / AI"; subtitle: "INT8 가속 · mAP@.5:.95 손실 · " + kpiData.yoloModel; pass: page.okSafety; hasData: page.hasSafety
+                    title: "Safety / AI"; subtitle: "FP16 가속 · mAP@.5:.95 손실 · " + kpiData.yoloModel; pass: page.okSafety; hasData: page.hasSafety
                     property real int8Speed: config.ptBaselineMs / Math.max(kpiData.inferenceMs, 1)
                     // mAP loss vs FP32 baseline, on the active model's map50 (0x101).
                     property real int8Loss: kpiData.accFp32 > 0 ? ((kpiData.accFp32 - kpiData.accInt8) / kpiData.accFp32 * 100) : 0
                     property real fp16Loss: kpiData.accFp32 > 0 ? ((kpiData.accFp32 - kpiData.accFp16) / kpiData.accFp32 * 100) : 0
                     id: safetyCard
                     ChartBox {
-                        // INT8 가속 (대표 비율값) → BigStat (larger-is-better)
+                        // FP16 가속 (대표 비율값) → BigStat (larger-is-better)
                         MetricBlock {
-                            name: "INT8 가속"
+                            name: "FP16 가속"
                             valueText: "target ≥ " + config.targetSpeedupRatio.toFixed(1) + "×"
                             valueColor: theme.bodyDim
                             BigStat {
@@ -605,15 +605,15 @@ Item {
                         // INT8 mAP 손실 (작을수록 좋음) → AxisDot
                         MetricBlock {
                             name: "mAP@.5:.95 손실"
-                            valueText: kpiData.hasAccuracy ? (safetyCard.int8Loss.toFixed(2) + " %") : "데이터 없음"
+                            valueText: kpiData.hasAccuracy ? (safetyCard.fp16Loss.toFixed(2) + " %") : "데이터 없음"
                             valueColor: page.statusColor(kpiData.hasAccuracy, page.mSafeLossOk)
                             AxisDot {
-                                value: safetyCard.int8Loss; max: 30; targetMax: config.targetMapLossPct
+                                value: safetyCard.fp16Loss; max: 30; targetMax: config.targetMapLossPct
                                 color: page.statusColor(kpiData.hasAccuracy, page.mSafeLossOk)
                                 loLabel: "0"; midLabel: "↑ target " + config.targetMapLossPct + "%"; hiLabel: "30 %"
                             }
                             Text {
-                                text: kpiData.hasAccuracy ? ("INT8 mAP " + kpiData.accFp32.toFixed(1) + " → " + kpiData.accInt8.toFixed(1) + " (" + kpiData.yoloModel + ")") : ""
+                                text: kpiData.hasAccuracy ? ("FP16 mAP " + kpiData.accFp32.toFixed(1) + " → " + kpiData.accFp16.toFixed(1) + " (" + kpiData.yoloModel + ")") : ""
                                 color: theme.bodyDim; font.family: theme.monoFont.family; font.pixelSize: 11
                             }
                         }
